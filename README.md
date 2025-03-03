@@ -1,5 +1,7 @@
 # MyDevLog
 
+**[MyDevLog](https://maydayxi.github.io/MyDevLog/)**
+
 This is my tech blog site, built with Hugo.
 
 This blog shares technical articles about software development, programming and tech-related topics.
