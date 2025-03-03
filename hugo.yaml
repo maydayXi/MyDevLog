@@ -74,7 +74,7 @@ params:
       # If true, the avatar image should be placed at assets/${avatar.src}
       local: true
       # Default: img/avatar.png
-      src: img/avatar.png
+      src: image/me.jpg
 
   # Configuration for the article page.
   # See https://stack.jimmycai.com/config/article
