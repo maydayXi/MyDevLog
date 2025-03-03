@@ -1,0 +1,155 @@
+baseURL: https://example.org/
+languageCode: zh-tw
+theme: hugo-theme-stack
+title: My Dev Log
+copyright: MyDevLog
+
+# Theme i18n support
+# Available values: ar, bn, ca, de, el, en, es, fr, hu, id, it, ja, ko, nl, pt-br, th, uk, zh-cn, zh-hk, zh-tw
+DefaultContentLanguage: zh-tw
+
+# language configuration
+# See https://gohugo.io/methods/site/languages/#article
+languages:
+  zh-tw:
+    languageName: 中文
+    title: My Dev Log
+    weight: 1
+    params:
+      sidebar:
+        subtitle: Welcome to my dev log.
+
+# See https://gohugo.io/getting-started/configuration/#timezone
+timeZone: Asia/Taipei
+
+# See https://gohugo.io/methods/site/config/#servicess
+services:
+  # GA Tracking ID
+  googleAnalytics:
+    id:
+
+# Control pagination behavior
+# See https://gohugo.io/templates/pagination/#configuration
+pagination:
+  # The number of pages per pager. Default is 10.
+  # 3 pages per paper
+  paperSize: 3
+
+# Site-wide settings
+# See https://stack.jimmycai.com/config/site
+params:
+  # Site favicon path.
+  favicon:
+  # Pages places under sections will be shown on homepage and archive page.
+  mainSections: posts
+  # Front Matter field used to get the featured image of a page.
+  featuredImageField: image
+
+  # The last section of the page.
+  # It is usually used to display the copyright information.
+  # See https://stack.jimmycai.com/config/footer
+  footer:
+    # The year when the site is created.
+    since: 2025
+
+  # Date format setting.
+  # See https://stack.jimmycai.com/config/date-format
+  dateFormat:
+    # Page's publish date format.
+    published: 2006-01-02
+    # Page's last updated date format
+    lastUpdated: 2006-01-02T15:04:00+0800
+
+  # Settings related with left-side sidebar.
+  # See https://stack.jimmycai.com/config/sidebar
+  sidebar:
+    # Subtitle displayed below the site title.
+    # See https://stack.jimmycai.com/config/sidebar#subtitle
+    description: Welcome to my dev log.
+    # Image that represents you in web site.
+    # See https://stack.jimmycai.com/config/sidebar#avatar
+    avatar:
+      # Enable avatar
+      enabled: true
+      # If true, the avatar image should be placed at assets/${avatar.src}
+      local: true
+      # Default: img/avatar.png
+      src: img/avatar.png
+
+  # Configuration for the article page.
+  # See https://stack.jimmycai.com/config/article
+  article:
+    # Enable math support by KaTeX.
+    # Can be overridden by front matter field math.
+    math: false
+    # Enable by default table of contents.
+    # Can be overridden by front matter field toc.
+    toc: true
+    # Display an estimated reading time for the article.
+    readingTime: true
+    # Configurations related with license.
+    license:
+      # Display license information under the article.
+      enabled: true
+      # Default: Licensed under CC BY-NC-SA 4.0
+
+  # Widgets are placed at right sidebar of the blog.
+  # Used to display some information such as categories, tags, etc.
+  # See https://stack.jimmycai.com/config/widgets
+  widgets:
+    homepage:
+      # Display a list of years
+      # with the number of posts published in each year.
+      - type: archives
+        params:
+          # Number of years to display. Default 10
+          limit: 3
+      # Display a search box.
+      - type: search
+      # Display a list of categories available in the blog.
+      - type: categories
+        params:
+          # Number of categories to display. Default: 10
+          limit: 20
+      # Display a tag cloud.
+      - type: tag-cloud
+        params:
+          # Number of tags to display. Default: 10
+          limit: 10
+    page:
+      # Display a table of contents of the page.
+      - type: toc
+
+  # Light and dark color schemes are available in this theme.
+  # See https://stack.jimmycai.com/config/color-scheme
+  colorSchema:
+    # Display the color scheme toggle button.
+    toggle: true
+    # The default color scheme,
+    # used when the toggle option is set to false
+    # or when the user visits the site for the first time.
+
+    # When set to auto,
+    # the color scheme will be determined by the user's system preference
+    default: auto
+
+  # See https://stack.jimmycai.com/config/image-processing
+  imageProcessing:
+    cover:
+      # Enable image processing for cover (featured) images.
+      enabled: true
+    content:
+      # Enable image processing for images in content.
+      enabled: true
+
+### Custom Menu
+### See https://stack.jimmycai.com/config/menu
+menu:
+  main: []
+
+  social:
+    - identifier: github
+      name: GitHub
+      url: https://github.com/maydayXi/
+      params:
+        icon: brand-github
