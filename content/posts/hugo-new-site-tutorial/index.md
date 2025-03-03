@@ -21,13 +21,13 @@ image: hugo-logo.png
 
 # Hugo 簡介
 
-[Hugo](https://gohugo.io/) 從官方網站的介紹可以知道，它是一個可以快速產生靜態網頁的工具。再加上有豐富的網站[主題](https://themes.gohugo.io/)可以套用，所以非常適合用來建立個人網站。
+**_[Hugo](https://gohugo.io/)_** 從官方網站的介紹可以知道，它是一個可以快速產生靜態網頁的工具。再加上有豐富的網站**_[主題](https://themes.gohugo.io/)_**可以套用，所以非常適合用來建立個人網站。
 
 # 安裝套件
 
 由於我是使用 mac 電腦，所以以下教學會以 **`macOS`** 為主
 
-所有步驟可以參考 _[Hugo Quick Start](https://gohugo.io/getting-started/quick-start/)_
+所有步驟可以參考 **_[Hugo Quick Start](https://gohugo.io/getting-started/quick-start/)_**
 
 ## 安裝 Homebrew
 
@@ -57,9 +57,9 @@ hugo version
 
 ## 安裝 Git
 
-Git 是一個程式碼版本控制的工具，後面佈署的時候會用 _[Git Pages](https://pages.github.com/)_ 的服務
+Git 是一個程式碼版本控制的工具，後面佈署的時候會用 **_[Git Pages](https://pages.github.com/)_** 的服務
 
-一樣使用終端機安裝，在終端機輸入，可以參考 _[Git Download for macOS](https://git-scm.com/downloads/mac)_ 或 _[Installing Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)_
+一樣使用終端機安裝，在終端機輸入，可以參考 **_[Git Download for macOS](https://git-scm.com/downloads/mac)_** 或 **_[Installing Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)_**
 
 ```bash
 brew install git
@@ -134,3 +134,57 @@ git push -u origin main
 完成後到 GitHub 網站上重新整理，如果出現下面的畫面就表示同步成功了
 
 ![Remote finished](remote-finished.png)
+
+# 建立 Hugo 網站
+
+先確定目前的工作目錄是在**本機 Repository 的上一層**，下面會說明為什麼
+
+- pwd：print work directory 印出目前的工作（所在）目錄
+
+```bash
+pwd
+```
+
+## 切換工作目錄（optional）
+
+如果已經在上一層目錄，可以跳過，直接下一步強制建立
+
+以我的例子來說需要在 `Documents`，如果你照著教學做下來應該不會在 Documents 目錄
+
+- ..：上一層目錄
+
+```bash
+cd ..
+```
+
+![Change to parent directory](change-directory.png)
+
+## 建立網站-強制
+
+在終端機輸入指令 `hugo new site <directory name>`
+
+`<directory name>` 是網站要產生的**目的目錄**，所以上一個步驟才需要回到 repository 的上一層
+
+參考 **_[Hugo Create Site](https://gohugo.io/getting-started/quick-start/#create-a-site)_**
+
+~~當然也可以在 repository 目錄下建立，不過這目錄結構會變成下面這樣，有點多餘（不建議）~~
+
+```tree
+-┬HugoSampleSite
+ |--HugoSampleSite
+```
+
+由於 `HugoSampleSite` 目錄中已經有其他檔案存在（git 的相關設定檔），所以要強制建立
+網站，在指令的最後加上 **--force**
+
+```bash
+hugo new site HugoSampleSite --force
+```
+
+原因在於 **hugo new site path** 只能建立在空的目錄，參考 **_[hugo new site](https://gohugo.io/commands/hugo_new_site/#hugo-new-site)_** 說明，如果沒有加 **--force** 會出現錯誤訊息
+
+![Hugo new site error](hugo-new-site-error.png)
+
+在強制建立完成後，如果有看到 **Just a few more step** 的相關訊息，就是建立完成，也可以開啟網站所在目錄，確認網站建立完成
+
+![HugoSampleSite](hugo-sample-site.png)
