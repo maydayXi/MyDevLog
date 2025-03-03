@@ -153,3 +153,11 @@ menu:
       url: https://github.com/maydayXi/
       params:
         icon: brand-github
+
+# Custom Table of content
+# See https://gohugo.io/getting-started/configuration-markup/#table-of-contents
+markup:
+  tableOfContents:
+    startLevel: 1
+    endLevel: 3
+    ordered: true
