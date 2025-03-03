@@ -137,6 +137,8 @@ git push -u origin main
 
 # 建立 Hugo 網站
 
+參考 **_[Hugo create a site](https://gohugo.io/getting-started/quick-start/#create-a-site)_**
+
 先確定目前的工作目錄是在**本機 Repository 的上一層**，下面會說明為什麼
 
 - pwd：print work directory 印出目前的工作（所在）目錄
@@ -188,3 +190,86 @@ hugo new site HugoSampleSite --force
 在強制建立完成後，如果有看到 **Just a few more step** 的相關訊息，就是建立完成，也可以開啟網站所在目錄，確認網站建立完成
 
 ![HugoSampleSite](hugo-sample-site.png)
+
+# 第一版程式上傳（optional）
+
+網站目錄建立完成後，終端機輸入 **cd HugoSampleSite** 切回 `HugoSampleSite` 目錄，接著進行第一版的網站上傳，依序輸入下列指令
+
+```bash
+cd HugoSampleSite/
+```
+
+因為 git 非本篇重點，先照著操作就可以了
+
+- **git add：** 提交變動的檔案到暫存區（Stage）「.」表示所有檔案
+
+```bash
+git add .
+```
+
+- **git status：** 檢查暫存區檔案狀態
+
+```bash
+git status
+```
+
+- **git commit：** 紀錄變更歷史
+  - **-m：** 參數，紀錄變更的訊息
+
+```bash
+git commit -m "init commit"
+```
+
+- **git push：** 將變更的檔案推送至 GitHub repository
+
+```bash
+git push
+```
+
+![Git init commit and push](git-init-commit-push.png)
+
+回到 GitHub Repository 確認上傳成功
+
+![GitHub init commit](github-init-commit.png)
+
+# 套用主題
+
+```bash
+
+```
+
+# 編譯並執行
+
+進行網站編譯。
+
+```bash
+cd HugoSampleSite/
+```
+
+由上一步可以看到目錄下有一些初始的資料夾以及相關的檔案，如 hugo.toml 設定檔。
+hugo 是由 [Go](https://zh.wikipedia.org/zh-tw/Go) 語言寫的，所以會用 Go 的編譯器將目錄下的檔案編譯成靜態的網頁檔，如 **.html, .css, .js** 等等，並產出到 public 錄目。
+
+相關指令
+
+- **hugo：編譯網站**
+- **hugo server：執行網站（本機）**
+
+網站編譯，編譯後會產生 `public/` 目錄
+
+```bash
+hugo
+```
+
+![HugoSampleSite build](hugo-sample-site-build.png)
+
+![HugoSampleSite public](hugo-sample-site-public.png)
+
+也可以直接下 **hugo server**，編譯並執行，會在本機端建立一個模擬的伺服器
+
+```bash
+hugo server
+```
+
+![HugoSampleSite hugo server](hugo-sample-site-server.png)
+
+輸入上圖的網址，就可以看到執行的結果了
