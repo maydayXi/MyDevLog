@@ -10,6 +10,7 @@ tags:
   - git
   - GitHub
   - GitHub Pages
+  - Terminal
 image: hugo-logo.png
 ---
 
@@ -191,9 +192,12 @@ hugo new site HugoSampleSite --force
 
 ![HugoSampleSite](hugo-sample-site.png)
 
-# 第一版程式上傳（optional）
+# 第一版程式上傳
 
-網站目錄建立完成後，終端機輸入 **cd HugoSampleSite** 切回 `HugoSampleSite` 目錄，接著進行第一版的網站上傳，依序輸入下列指令
+可以的話請先閱讀 **_[版本控制特別說明](#上傳第二版程式)_**，再決定是否要上傳第一版。
+也可以在第二版上傳步驟一次上傳。
+
+終端機輸入 **cd HugoSampleSite** 切回 `HugoSampleSite` 目錄，接著進行第一版的網站上傳，依序輸入下列指令
 
 ```bash
 cd HugoSampleSite/
@@ -234,20 +238,38 @@ git push
 
 # 套用主題
 
-```bash
+可以在 **_[Hugo Theme](https://themes.gohugo.io/)_** 找到自己喜歡的主題下載下來套用，不過每個主題的設定方式略有不同，所以要以官方文件為主。而同一個主題也會至少有兩以上的安方式，沒有哪一個比較好，我只是做其中一種方式而已。
 
+## Stack 官方文件
+
+我以 **_[Stack](https://themes.gohugo.io/themes/hugo-theme-stack/)_** 為例，到主題頁後，可以點「**_[Download](https://github.com/CaiJimmy/hugo-theme-stack)_**」會導向它的 GitHub，在 Readme 中可以找到 Documentation
+有一個 **_[stack.jimmycai.com](https://stack.jimmycai.com/)_** 連結，就會找到他的官方文件。
+
+## 下載 Stack 主題至網站
+
+在官網中有一個 **_[Get started](https://stack.jimmycai.com/guide/getting-started)_** 往下會有一個 **_[installation](https://stack.jimmycai.com/guide/getting-started#installation)_** 的段落，因為已經有 git 的關係，所以我選擇第二個方式安裝。
+
+![Hugo-Theme-Stack-Installation](hugo-theme-stack-installation.png)
+
+複製指令後，回到終端機，確認目前所在目錄是網站的根目錄，將複製的指令（或下方）貼上執行
+
+```bash
+git submodule add https://github.com/CaiJimmy/hugo-theme-stack/ themes/hugo-theme-stack
+```
+
+成功安裝會看到下面的畫面
+
+![Hugo-Theme-Stack installed](hugo-theme-stack-installed.png)
+
+最後在根目錄下找到網站的設定檔 **hugo.toml**（通常會是這個名字），用編輯器或 IDE 打開，我使用的是 **_[Visual Studio Code](https://code.visualstudio.com/)_**，也可以使用其他的編輯器
+
+```toml
+theme = 'hugo-theme-stack'
 ```
 
 # 編譯並執行
 
-進行網站編譯。
-
-```bash
-cd HugoSampleSite/
-```
-
-由上一步可以看到目錄下有一些初始的資料夾以及相關的檔案，如 hugo.toml 設定檔。
-hugo 是由 [Go](https://zh.wikipedia.org/zh-tw/Go) 語言寫的，所以會用 Go 的編譯器將目錄下的檔案編譯成靜態的網頁檔，如 **.html, .css, .js** 等等，並產出到 public 錄目。
+接著進行網站編譯，hugo 是由 [Go](https://zh.wikipedia.org/zh-tw/Go) 語言寫的，所以會用 Go 的編譯器將目錄下的檔案（主題包，設定檔……）編譯成靜態的網頁檔，如 **.html, .css, .js** 等等，並產出到 public 錄目。
 
 相關指令
 
@@ -272,4 +294,54 @@ hugo server
 
 ![HugoSampleSite hugo server](hugo-sample-site-server.png)
 
-輸入上圖的網址，就可以看到執行的結果了
+在瀏覽器中輸入上圖的網址「**http://localhost:port**」port 可能會不一樣，就可以看到執行的結果了
+
+![HugoSampleSite with hugo-theme-stack](hugo-theme-stack-apply.png)
+
+成功後會發現主題已經套用了，可以按「**Ctrl + C**」結束執行
+
+# 上傳第二版程式
+
+## 版本控制特別說明
+
+如果有先 Google 過其他的教學文，應該會發現我的做法不太一樣
+
+1. 我在 create repository 的時候就建立版本控制的目錄了
+2. 在一開始 hugo new site 完成的時候，我就上傳了第一個程式版本
+
+這涉及到對版本控制的理解不同，發現很多教學文，都是在 **hugo server** 之後才進入版本控制，而且只會將編譯後的 `public/` 目錄上傳到 GitHub 做版本控制。
+
+不過我認為，`public/` 是編譯後的產物，hugo 的編譯機制對於初學者來說，比較雖去追踨編譯前改了什麼東西，導致編譯後的結果不同。所以我選擇了版本控制整個專案，也因為這樣的決擇，我的佈署方式也會不同。
+
+當然沒有哪一種作是是絕對的對或絕對的好，只有在不同的情況下，採用不同的做法，當然如果是照本篇教學文做下來，就只能用我的做法完成，不然後續佈署的時候會出問題。
+
+**另外如果第一版沒有上傳的話，第二版上傳的步驟一定要做**
+
+**_[回到第一版程式上傳](#第一版程式上傳)_**
+
+## 加入 .gitignore 檔案
+
+.gitignore 檔是告訴 git 有哪些檔案或目錄不需要版本控制，這裡可以直接複製剛剛安裝的主題在 `theme/hugo-theme-stack/` 下有一個 `.gitignore` 檔，它是一個隱藏的檔案，需要設定把隱藏拿掉才看得到。
+
+![.gitignore](hugo-theme-stack-gitignore.png)
+
+把 `.gitignore` 複製到網站根目錄下。
+
+![HugoSampleSite gitignore](hugo-sample-site-gitignore.png)
+
+## 上傳第二版
+
+接著照第一版程式上傳步驟進行到 commit 階段
+**將 commit -m 參數訊息改寫成 "Add hugo-theme-stack"**
+
+```bash
+git commit -m "Add hugo-theme-stack"
+```
+
+最後到 GitHub Repository 確認上傳結果
+
+![GitHub Second Commit](github-second-commit.png)
+
+# 完成
+
+到這邊已經完成了一個套用主題的網站了，不過還是 **_[Demo](https://demo.stack.jimmycai.com/)_** 差得很遠，下一篇教學會告訴大家如何設定主題的詳細設置。而我的第一篇終於也完成了~
