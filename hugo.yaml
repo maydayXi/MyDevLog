@@ -161,3 +161,13 @@ markup:
     startLevel: 1
     endLevel: 3
     ordered: true
+  # See https://gohugo.io/getting-started/configuration-markup/#highlight
+  highlight:
+    noClasses: false
+    codeFences: true
+    guessSyntax: true
+    lineNoStart: 1
+    lineNos: true
+    lineNumbersInTable: true
+    tabWidth: 4
+    # For style see https://gohugo.io/getting-started/configuration-markup/#highlight
