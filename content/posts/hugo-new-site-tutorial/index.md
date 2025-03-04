@@ -2,11 +2,11 @@
 date: "2025-03-03T17:37:55+08:00"
 draft: false
 title: "Hugo 架站教學 - 建立網站"
-description: 使用 Hugo 架設自己部落格
+description: 使用 Hugo 架設自己的部落格
 categories:
   - WebSite
-  - Hugo
 tags:
+  - Hugo
   - git
   - GitHub
   - GitHub Pages
@@ -19,6 +19,12 @@ image: hugo-logo.png
 最近在面試的時候，被面試官問到「**有沒有什麼可以代表你**」的東西，我才發現我累積了一些經驗，也做了一些做品，但缺少了整合，所以讓我開始思考要架設一個自己的 Blog。在搜尋方法的同時我發現了 Hugo 這樣的一個強大工具，也讓我產生了要使用 Hugo 架設的想法。
 
 我的 Blog 是使用 Hugo 架設的，所以有個實際的案例，用來做為 Blog 的首篇文章非常適合。其次在架設的過程中遇到了一些設定上的問題，希望可以紀錄下來，整理成一個指南，並分享給所有要用 Hugo 架站的人。
+
+# 重點
+
+1. 建立 GitHub Repository
+2. 建立 Hugo 網站
+3. 套用 Hugo 主題
 
 # Hugo 簡介
 
