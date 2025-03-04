@@ -1,7 +1,7 @@
 ---
 date: "2025-03-03T17:37:55+08:00"
 draft: false
-title: "Hugo 架站教學"
+title: "Hugo 架站教學 - 建立網站"
 description: 使用 Hugo 架設自己部落格
 categories:
   - WebSite
@@ -247,7 +247,9 @@ git push
 
 ## 下載 Stack 主題至網站
 
-在官網中有一個 **_[Get started](https://stack.jimmycai.com/guide/getting-started)_** 往下會有一個 **_[installation](https://stack.jimmycai.com/guide/getting-started#installation)_** 的段落，因為已經有 git 的關係，所以我選擇第二個方式安裝。
+在官網中有一個 **_[Get started](https://stack.jimmycai.com/guide/getting-started)_** 往下會有一個 **_[installation](https://stack.jimmycai.com/guide/getting-started#installation)_** 的段落，我選擇第二個方式安裝。
+
+兩種安裝方式的差異非本次重點，有興趣可以自行研究。
 
 ![Hugo-Theme-Stack-Installation](hugo-theme-stack-installation.png)
 
@@ -261,11 +263,13 @@ git submodule add https://github.com/CaiJimmy/hugo-theme-stack/ themes/hugo-them
 
 ![Hugo-Theme-Stack installed](hugo-theme-stack-installed.png)
 
-最後在根目錄下找到網站的設定檔 **hugo.toml**（通常會是這個名字），用編輯器或 IDE 打開，我使用的是 **_[Visual Studio Code](https://code.visualstudio.com/)_**，也可以使用其他的編輯器
+最後在根目錄下找到網站的設定檔 **hugo.toml**（通常會是這個名字），用編輯器或 IDE 打開，我使用的是 **_[Visual Studio Code](https://code.visualstudio.com/)_**，也可以使用其他的編輯器，加入下方的文字設定網站要套用的主題
 
 ```toml
 theme = 'hugo-theme-stack'
 ```
+
+![HugoSampleSite hugo-theme-stack configuration](hugo-theme-stack-configuration.png)
 
 # 編譯並執行
 
