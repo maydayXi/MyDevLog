@@ -178,9 +178,9 @@ languages:
 #   weight: 2
 ```
 
-### 總結
+### 語系總結
 
-最後設定完，設定檔 `hugo.yaml` 會長這樣
+最後設定完，設定檔 `hugo.yaml` 會長這樣，如果是用 Hugo 內建的設定要注意每個語系的結構，語系的最上層要對齊，跟 Python 一樣是用縮排在表示物件結構
 
 ```yaml
 baseURL: https://example.org/
@@ -199,4 +199,133 @@ DefaultContentLanguage: zh-tw
 #     languageCode: zh-tw
 #     languageName: 中文
 #     title: "示範網站"
+```
+
+## Site-Wide 設定
+
+參考 **_[Site-Wide settings](https://stack.jimmycai.com/config/site)_**
+
+全站設定，會套用到整個網站，在 **params** 的下面，也就是說架構要像下面這樣
+
+```yaml
+params:
+  # 其他相關設定
+```
+
+這裡不會全列出來，只說明幾個比較會用到的。
+
+### mainSections
+
+指首頁或文庫頁要呈現的內容，預設是 post，也就是 **post 目錄** 下的內容，因此可以將 po 文都放在 post 目錄下，可以改成自己想要的目錄，呈現自己想要的內容，範例用預設值就好
+
+```yaml
+params:
+  mainSections: <dirname>
+```
+
+### featuredImageField
+
+這個設定關係到 po 文，featuredImage 就是 po 文上面的縮圖
+
+![Feature Image](featured-image.png)
+
+而 featuredImageField 就是 po 文上面的圖片，設定的欄位要叫什麼，預的名稱是 image
+
+也就是說如果在 `hugo.yaml` 設定改成 img
+
+```yaml
+params:
+  featuredImageField: img
+```
+
+那在 po 文的地方，想要加入縮圖的話就要變成下面這樣
+
+index.md
+
+```yaml
+img: imgSrc
+```
+
+### favicon
+
+就是網頁標籤左邊的縮圖，可以不設定
+
+![favicon](favicon.png)
+
+### Site-wide 總結
+
+簡單來說上面的三項設定，都可以用預的值，所以 `hugo.yaml` 設定檔不變
+
+## Date Format
+
+參考 **_[Date format 設定](https://stack.jimmycai.com/config/date-format)_**
+
+日期的格式設定，這裡要特別注意，Hugo 是用 Go 語言寫出來的，所以要用的日期格式設定。
+而 Go 的日期與其他程式語言不同，不是用字串模版的產生的
+
+如 C#，yyyy（4 位數年份）、MM（2 位數月份，不足補 0）、dd（2 位數的日期，不足補 0）
+
+```csharp
+DateTime Now = DateTime.Now;
+
+Console.WriteLine($"{Now:yyyy-MM-dd}");
+
+// Output 2025-03-04
+```
+
+**Go 有一個固定的日期，一定要是 2006 年 1 月 2 日，下午 3 點 04 分 05 秒**，我原本以為是個隨意的日期，所以就設定成了架設網站當天的日期，結果 po 文的時間完全的錯的。
+後來 Google 才知道原來這是故意設計的，上面的時間點會變成 **6 1 2 3 4 5** 沒有一個數字是重複的
+
+### published
+
+po 文日期的呈現樣式設定（可以參考 featuredImage 那張圖，閱讀時間旁有 po 文的日期），這邊改成我比較熟悉的格式
+
+```yaml
+params:
+  # 日期格式設定
+  dateFormat:
+    # po 文日期格式設定
+    published: 2006-01-02
+```
+
+### lastUpdated
+
+po 文最後更新時間格式的設定，在 dateFormat 下面加上，**T 用來分隔日期跟時間**，**+0800 是因為臺灣的時區是 GMT+8**
+
+```yaml
+# 最後更新時間格式設定
+lastUpdated: 2006-01-02T15:04+0800
+```
+
+### Date format 總結
+
+最後完成的設定檔如下
+
+```yaml
+baseURL: https://example.org/
+title: HugoSampleSite
+theme: hugo-theme-stack
+# 網站語系設定
+# 參考 https://stack.jimmycai.com/config/i18n
+DefaultContentLanguage: zh-tw
+# 參考 https://gohugo.io/content-management/multilingual/#configure-languages
+# 因為 Hugo 預設的系統語言是英文，所以需要將預設的語言改成中文
+# defaultContentLanguage: zh-tw
+# languages:
+#   zh-tw:
+#     disabled: false
+#     weight: 1
+#     languageCode: zh-tw
+#     languageName: 中文
+#     title: "示範網站"
+
+# Site-Wide 設定
+# 參考 https://stack.jimmycai.com/config/site
+params:
+  # 日期格式設定
+  dateFormat:
+    # po 文日期格式設定
+    published: 2006-01-02
+    # 最後更新時間格式設定
+    lastUpdated: 2006-01-02T15:04+0800
 ```
