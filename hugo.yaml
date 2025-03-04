@@ -1,5 +1,4 @@
 baseURL: https://example.org/
-languageCode: zh-tw
 theme: hugo-theme-stack
 title: My Dev Log
 copyright: MyDevLog
@@ -10,8 +9,10 @@ DefaultContentLanguage: zh-tw
 
 # language configuration
 # See https://gohugo.io/methods/site/languages/#article
+defaultLanguage: zh-tw
 languages:
   zh-tw:
+    languageCode: zh-tw
     languageName: 中文
     title: My Dev Log
     weight: 1
