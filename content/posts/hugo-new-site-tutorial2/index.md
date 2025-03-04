@@ -201,6 +201,8 @@ DefaultContentLanguage: zh-tw
 #     title: "示範網站"
 ```
 
+這裡特別說明一下，我每做完一個設定就會上傳一個版本，你也可以等到所有設定都完成後一次上傳，上傳流程請參考上一篇 **_[第一版程式上傳](/posts/hugo-new-site-tutorial/#第一版程式上傳)_**
+
 ## Site-Wide 設定
 
 參考 **_[Site-Wide settings](https://stack.jimmycai.com/config/site)_**
@@ -260,8 +262,8 @@ img: imgSrc
 
 參考 **_[Date format 設定](https://stack.jimmycai.com/config/date-format)_**
 
-日期的格式設定，這裡要特別注意，Hugo 是用 Go 語言寫出來的，所以要用的日期格式設定。
-而 Go 的日期與其他程式語言不同，不是用字串模版的產生的
+日期的格式設定，**需要放在 params 下面**，這裡要特別注意，Hugo 是用 Go 語言寫出來的，所以要用的日期格式設定。
+而 **Go 的日期與其他程式語言不同，不是用字串模版的產生的**
 
 如 C#，yyyy（4 位數年份）、MM（2 位數月份，不足補 0）、dd（2 位數的日期，不足補 0）
 
@@ -278,7 +280,7 @@ Console.WriteLine($"{Now:yyyy-MM-dd}");
 
 ### published
 
-po 文日期的呈現樣式設定（可以參考 featuredImage 那張圖，閱讀時間旁有 po 文的日期），這邊改成我比較熟悉的格式
+在 dateFormat 下面，po 文日期的呈現樣式設定（可以參考 featuredImage 那張圖，閱讀時間旁有 po 文的日期），這邊改成我比較熟悉的格式
 
 ```yaml
 params:
@@ -290,7 +292,7 @@ params:
 
 ### lastUpdated
 
-po 文最後更新時間格式的設定，在 dateFormat 下面加上，**T 用來分隔日期跟時間**，**+0800 是因為臺灣的時區是 GMT+8**
+一樣在 dateFormat 下面，po 文最後更新時間格式的設定，在 dateFormat 下面加上，**T 用來分隔日期跟時間**，**+0800 是因為臺灣的時區是 GMT+8**
 
 ```yaml
 # 最後更新時間格式設定
@@ -319,13 +321,122 @@ DefaultContentLanguage: zh-tw
 #     languageName: 中文
 #     title: "示範網站"
 
-# Site-Wide 設定
-# 參考 https://stack.jimmycai.com/config/site
 params:
   # 日期格式設定
+  # 參考 https://stack.jimmycai.com/config/date-format
   dateFormat:
     # po 文日期格式設定
     published: 2006-01-02
     # 最後更新時間格式設定
     lastUpdated: 2006-01-02T15:04+0800
+```
+
+設定完成後，將程式上傳到 GitHub。
+
+## Sidebar
+
+參考 **_[Sidebar 設定](https://stack.jimmycai.com/config/sidebar)_**
+
+左邊選單的相關設定，一樣放在 **params 下面**
+
+### subtitle
+
+在 sidebar 的下面，設定副標題，在網頁圖像下方標題的下方，有一行更小的文字
+
+```yaml
+params:
+  # 左邊選單設定
+  # 參考 https://stack.jimmycai.com/config/sidebar
+  sidebar:
+    # 設定網頁副標題
+    subtitle: 這是一個教學範例網站
+```
+
+設定完成後，編譯並執行網站
+
+![HugoSampleSite subtitle](hugo-sample-site-subtitle.png)
+
+### avatar
+
+在 sidebar 下面，網站頭像設定
+
+```yaml
+params:
+  sidebar:
+    avatar:
+      # avatar 相關設定
+```
+
+#### enabled
+
+是否啟用頭像，預設是啟用
+
+#### local
+
+頭像是否是網站內的資源，預設是 **true**，也就是說如果你要用網路資源的話，要將這個值設成 **false**。
+
+**如果使用預設值的話，需要將圖片檔案下載放到目錄下的 `assets/img` 資料夾，在編譯時會將 `img` 目錄帶過去 `public`，這樣下一個屬性才有辦法做用，千萬不要放在 `static/img`**
+
+```yaml
+params:
+  sidebar:
+    avatar:
+      # 如果要用網路資源
+      local: false
+```
+
+#### src
+
+頭像的來源，預設是 `img/avatar.png`，如果上一設定設成 false，可以設成網路圖像的連結；反之，就要將圖片下載至 `assets/img` 目錄，沒有這個目錄的話，可以自已建
+
+```yaml
+params:
+  sidebar:
+    avatar:
+      src: https://cdn3d.iconscout.com/3d/premium/thumb/boy-avatar-3d-icon-download-in-png-blend-fbx-gltf-file-formats--boys-male-man-pack-avatars-icons-5187865.png?f=webp
+```
+
+設定完成後，可以在 hugo server 中看執行的結果
+
+![HugoSampleSite avatar](hugo-sample-site-avatar.png)
+
+### sidebar 總結
+
+最後本教學是採用網路資源，設定檔完成後會變成下面
+
+```yaml
+baseURL: https://example.org/
+title: HugoSampleSite
+theme: hugo-theme-stack
+# 網站語系設定
+# 參考 https://stack.jimmycai.com/config/i18n
+DefaultContentLanguage: zh-tw
+# 參考 https://gohugo.io/content-management/multilingual/#configure-languages
+# 因為 Hugo 預設的系統語言是英文，所以需要將預設的語言改成中文
+# defaultContentLanguage: zh-tw
+# languages:
+#   zh-tw:
+#     disabled: false
+#     weight: 1
+#     languageCode: zh-tw
+#     languageName: 中文
+#     title: "示範網站"
+
+params:
+  # 日期格式設定
+  # 參考 https://stack.jimmycai.com/config/date-format
+  dateFormat:
+    # po 文日期格式設定
+    published: 2006-01-02
+    # 最後更新時間格式設定
+    lastUpdated: 2006-01-02T15:04+0800
+  # 左邊選單設定
+  # 參考 https://stack.jimmycai.com/config/sidebar
+  sidebar:
+    # 設定網頁副標題
+    subtitle: 這是一個教學範例網站
+    # 設定網站頭像
+    avatar:
+      src: https://cdn3d.iconscout.com/3d/premium/thumb/boy-avatar-3d-icon-download-in-png-blend-fbx-gltf-file-formats--boys-male-man-pack-avatars-icons-5187865.png?f=webp
+      local: false
 ```
