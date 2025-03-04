@@ -12,6 +12,11 @@ tags:
   - GitHub Pages
   - Terminal
 image: hugo-logo.png
+links:
+  - title: Hugo-sample-site
+    description: GitHub 專案源始碼
+    website: https://github.com/maydayXi/Hugo-sample-site
+    image: https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png
 ---
 
 # 為什麼寫這篇教學
