@@ -201,7 +201,7 @@ DefaultContentLanguage: zh-tw
 #     title: "示範網站"
 ```
 
-這裡特別說明一下，我每做完一個設定就會上傳一個版本，你也可以等到所有設定都完成後一次上傳，上傳流程請參考上一篇 **_[第一版程式上傳](/posts/hugo-new-site-tutorial/#第一版程式上傳)_**
+這裡特別說明一下，我每做完一個設定就會上傳一個版本，你也可以等到所有設定都完成後一次上傳，上傳流程請參考上一篇 **_[第一版程式上傳](/posts/hugo-new-site-tutorial/#第一版程式上傳)_**，**如果要上版的話，請先結束執行中的網站「control + c」**，才有辦法上傳。
 
 ## Site-Wide 設定
 
@@ -262,7 +262,15 @@ img: imgSrc
 
 參考 **_[Date format 設定](https://stack.jimmycai.com/config/date-format)_**
 
-日期的格式設定，**需要放在 params 下面**，這裡要特別注意，Hugo 是用 Go 語言寫出來的，所以要用的日期格式設定。
+日期的格式設定，**需要放在 params 下面**，格式如下
+
+```yaml
+params:
+  dateFormat:
+    # 其它日期格式相關設定
+```
+
+這裡要特別注意，Hugo 是用 Go 語言寫出來的，所以要用的日期格式設定。
 而 **Go 的日期與其他程式語言不同，不是用字串模版的產生的**
 
 如 C#，yyyy（4 位數年份）、MM（2 位數月份，不足補 0）、dd（2 位數的日期，不足補 0）
@@ -440,3 +448,186 @@ params:
       src: https://cdn3d.iconscout.com/3d/premium/thumb/boy-avatar-3d-icon-download-in-png-blend-fbx-gltf-file-formats--boys-male-man-pack-avatars-icons-5187865.png?f=webp
       local: false
 ```
+
+這邊在上一版程式
+
+## Footer
+
+有寫過 HTML 的話應該會知道 footer，就是網頁最下方的區塊。
+
+相關設定參考 **_[Footer Configuration](https://stack.jimmycai.com/config/footer)_**
+
+結構上一樣是放在 **params** 的下面
+
+```yaml
+params:
+  footer:
+    # 其他 footer 的相關設定
+```
+
+我不打算改動它，直接用預設的就好，不過還是介紹一下。至於為什麼會在這麼上的位置，是因為目前還沒有任何的 po 文，而主題 footer 的設定應該不是固定在底部的，所以才會往跑。
+
+![HugoSampleSite footer](hugo-sample-site-footer.png)
+
+### since
+
+是網站創建的時間（年），以今年為例
+
+```yaml
+params:
+  footer:
+    since: 2025
+```
+
+### customText
+
+想要在 footer 顯示的文字，可以是純文字，也可以是一段 HTML
+
+```yaml
+params:
+  footer:
+    customText: Footer 的文字測試
+```
+
+![HugoSampleSite Footer customText](hugo-sample-site-footer-customtext.png)
+
+### Footer 總結
+
+由於我沒有對 footer 設定進行更動，所以這邊不做版本上傳，有興趣的可以自己嘗試。
+
+## Article
+
+po 文相關的設定，可以參考 **_[Article configuration](https://stack.jimmycai.com/config/article)_**
+
+結構如下
+
+```yaml
+params:
+  article:
+    # 其他 Article 相關設定
+```
+
+### math
+
+Hugo 的 po 文是採用 [Markdown](https://markdown.tw/) 語法所寫出來的，最後在編譯成 HTML 檔案，而 Markdown 支援數學公式，**這個設定主要是開啟數學公式的支援，讓你可以在 po 文中寫數學公式**
+
+不過我想一般的使用者應該不太有這個需求，所以就不特別做設定。
+
+```yaml
+params:
+  article:
+    math: true
+```
+
+### toc
+
+全文是 table of content，就是目錄的意思，是否要顯示 po 文的目錄。**要特別注意的是，需要在之後的小工具也做一樣的設定，才會生效**。
+
+```yaml
+params:
+  article:
+    toc: true
+```
+
+以本篇為例
+
+![HugoSampleSite toc](hugo-sample-site-toc.png)
+
+### readingTime
+
+閱讀時間的顯示設定，預設是開啟的，所以可以不動，圖片可以參考目錄那張副標題下方有一個閱讀時間：5 分鐘，如果不想顯示在把它設定關閉。
+
+```yaml
+params:
+  article:
+    # 如果要不顯示閱讀時間
+    readingTime: false
+```
+
+### license
+
+授權的相關設定，也就是你是否要授權其他人轉載你的 po 文。預設是使用 **_[Licensed under CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hant)_** 授權。
+
+結構如下
+
+```yaml
+params:
+  article:
+    license:
+      # 其他 license 相關設定
+```
+
+#### enabled
+
+是否顯示授權條款的文字「Licensed under CC BY-NC-SA 4.0」，預設是不顯示的，但我把它打開
+
+```yaml
+params:
+  article:
+    license:
+      # 顯示授權條款文字
+      enabled: true
+```
+
+#### default
+
+授權條款的文字，使用預設的就可以了，你也可以自己改成其它的條款文字，**_[條款參考](https://zh.wikipedia.org/zh-tw/%E7%9F%A5%E8%AF%86%E5%85%B1%E4%BA%AB%E8%AE%B8%E5%8F%AF%E5%8D%8F%E8%AE%AE)_**
+
+```yaml
+params:
+  article:
+    license:
+      # 授權條款文字
+      default: <其他授權條款文字>
+```
+
+### Article 總結
+
+以上我們只有設定了 toc、license 的 enabled，其他不動。
+
+```yaml
+baseURL: https://example.org/
+title: HugoSampleSite
+theme: hugo-theme-stack
+# 網站語系設定
+# 參考 https://stack.jimmycai.com/config/i18n
+DefaultContentLanguage: zh-tw
+# 參考 https://gohugo.io/content-management/multilingual/#configure-languages
+# 因為 Hugo 預設的系統語言是英文，所以需要將預設的語言改成中文
+# defaultContentLanguage: zh-tw
+# languages:
+#   zh-tw:
+#     disabled: false
+#     weight: 1
+#     languageCode: zh-tw
+#     languageName: 中文
+#     title: "示範網站"
+
+params:
+  # 日期格式設定
+  # 參考 https://stack.jimmycai.com/config/date-format
+  dateFormat:
+    # po 文日期格式設定
+    published: 2006-01-02
+    # 最後更新時間格式設定
+    lastUpdated: 2006-01-02T15:04+0800
+  # 左邊選單設定
+  # 參考 https://stack.jimmycai.com/config/sidebar
+  sidebar:
+    # 設定網頁副標題
+    subtitle: 這是一個教學範例網站
+    # 設定網站頭像
+    avatar:
+      src: https://cdn3d.iconscout.com/3d/premium/thumb/boy-avatar-3d-icon-download-in-png-blend-fbx-gltf-file-formats--boys-male-man-pack-avatars-icons-5187865.png?f=webp
+      local: false
+  # PO 文相關設定
+  # 參考 https://stack.jimmycai.com/config/article
+  article:
+    # 文章目錄：開啟
+    toc: true
+    license:
+      # 顯示授權條款文字
+      enabled: true
+```
+
+最後再上一版程式
