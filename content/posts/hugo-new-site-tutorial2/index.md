@@ -509,7 +509,7 @@ params:
 
 ### math
 
-Hugo 的 po 文是採用 [Markdown](https://markdown.tw/) 語法所寫出來的，最後在編譯成 HTML 檔案，而 Markdown 支援數學公式，**這個設定主要是開啟數學公式的支援，讓你可以在 po 文中寫數學公式**
+Hugo 的 po 文是採用 **_[Markdown](https://markdown.tw/)_** 語法所寫出來的，最後在編譯成 HTML 檔案，而 Markdown 支援數學公式，**這個設定主要是開啟數學公式的支援，讓你可以在 po 文中寫數學公式**
 
 不過我想一般的使用者應該不太有這個需求，所以就不特別做設定。
 
@@ -521,7 +521,7 @@ params:
 
 ### toc
 
-全文是 table of content，就是目錄的意思，是否要顯示 po 文的目錄。**要特別注意的是，需要在之後的小工具也做一樣的設定，才會生效**。
+全文是 table of content，就是目錄的意思，是否要顯示 po 文的目錄。**要特別注意的是，需要在之後的 _[小工具](#page)_ 也做一樣的設定，才會生效**。
 
 ```yaml
 params:
@@ -631,3 +631,233 @@ params:
 ```
 
 最後再上一版程式
+
+## Widgets
+
+網站小工具的設定，會顯示在網站的右邊，有分類，標籤……等元件。
+參考 **_[Widgets configuration](https://stack.jimmycai.com/config/widgets)_**
+
+有兩種類型的元件要設定，結構如下
+
+1. homepage：首頁元件
+2. page：非首頁的元件
+
+```yaml
+params:
+  widgets:
+    homepage:
+      # 其他首頁元件
+    page:
+      # 其他非首頁的元件設定
+```
+
+每個類型可以有多個元件，每一個元件設定是一個 **map，每一個 map 包含了 type 跟 params 的設定，這個 params 不是最上面的那 params，是元件自已的**，不懂沒關係照下面顯示的結構複製貼上就可以了，結構如下
+
+```yaml
+params:
+  widgets:
+    # 首頁要顯示的元件
+    homepage:
+      # map 用「-」開頭
+      - type: search # 一個搜尋類型的元件，不是所有元件都有 params 的設定，請參考官方文件
+      - type: tag-cloud # 一個標籤類型的元件
+        params:
+          limit: 20
+    # 非首頁要顯示的元件
+    page:
+      - type: toc
+```
+
+元件結果如下圖，接下來會依依說明如何開啟四大元件：搜尋、歴史記錄、分類、標籤。
+
+![Widgets](widgets.png)
+
+### page
+
+上面 **_[article toc](#toc)_** 設定中有提到，所以先講這一個，**要顯示 PO 文目錄，需要在 page 的 toc 也要設定，目錄才會顯示**
+
+```yaml
+params:
+  # 元件設定
+  widgets:
+    # 頁面的設定
+    page:
+      # 顯示頁面的目錄
+      - type: toc
+```
+
+### homepage
+
+首頁元件的相關設定，要跟 page 在同一層，不過首頁不要開目錄，看官方網站的說明可能會不太懂，直接看下方的結構說明就好。
+
+#### search
+
+搜尋元件，**這裡要特別注意，需要建立一個頁面並套用 search 版型(layout: search)，才會生效。我一開始以為是要在 `layout` 目錄下建立一個 search 專用的頁面，結果一直沒有顯示出來**，後來才知道 **要在 `content/page/search` 目錄下建立一個給搜尋用的頁面**
+
+```yaml
+params:
+  widgets:
+    # 首頁設定
+    homepage:
+      # 搜尋元件
+      - type: search
+```
+
+接下來建立一個供搜尋用的頁面，使用 hugo 建立新頁的指令 **hugo new content**，相關說明可以參考 **_[hugo new content](https://gohugo.io/commands/hugo_new_content/#hugo-new-content)_**
+
+```shell
+hugo new content content/page/search/index.md
+```
+
+接下來開啟剛剛新增的檔案，改成下面的內容後儲存
+
+```markdown
+---
+layout: search
+---
+```
+
+執行網站
+
+![HugoSampleSite search widget](hugo-sample-site-search-widget.png)
+
+#### archives
+
+顯示紀錄，也就是歴史文章，所有你寫的文章會有一個專屬的頁面，**跟搜尋一樣，要建立一個專屬的頁面，並套用 archives 版型，另外多了一個 params 的設定。params 裡面包含了一個 limit 的設定，就是要顯示多少年的文章**。假設想要顯示過去這 5 年所寫的文章，可以設 5，它就會顯示 2020 ~ 2025 的所有文章，這邊我設成 3 年
+
+**注意 params 要跟 type 在同一層，因為屬於同一個 map**
+
+```yaml
+params:
+  widgets:
+    homepage:
+      # 歷史文庫
+      - type: archives
+        params:
+          # 顯示近 3 年的文章
+          limit: 3
+```
+
+接下來在設定版面，要注意如果網站正在執行中要先停止執行，一樣使用 hugo new content 指令
+
+```shell
+hugo new content content/page/archives/index.md
+```
+
+再開啟剛剛新增的 index.md，改成下面的內容，套用歷史的版型
+
+```markdown
+---
+layout: archives
+---
+```
+
+執行網站
+
+![HugoSampleSite archives widget](hugo-sample-site-archives-widget.png)
+
+#### categories and tag-cloud
+
+分類跟標籤的設定，因為結構上一樣，所以一起說明
+
+跟 archives 的結構一樣，包**成一個 map，map 下有 type 設定元件的類型，接著一個 params，params 下有一個 limit 數字，預設都是 10**
+
+- categories 的 limit：分類顯示數量，如果設定 3，最多只會顯示三個分類。如果有第四種分類的文章出現，不會顯示第 4 分類。
+- tag-cloud 的 limit：標籤顯示數量，跟分類一樣
+
+```yaml
+params:
+  widgets:
+    homepage:
+      # 分類元件設定
+      - type: categories
+        params:
+          # 最多顯示 5 個分類
+          limit: 5
+      # 標籤元件設定
+      - type: tag-cloud
+        params:
+          # 最多顯示 20 個標籤
+          limit: 20
+```
+
+執行程式，就會看到標籤元件跟分類元件了，不過因為目前沒有任何 po 文，所以不會有任何的標籤及分類顯示，上一篇會說明如何 po 文。
+
+![HugoSampleSite categories and tag-cloud](hugo-sample-site-categories-and-tag-cloud.png)
+
+### Widgets 總結
+
+最後設定完元件，`hugo.yaml` 設定檔如下
+
+```yaml
+baseURL: https://example.org/
+title: HugoSampleSite
+theme: hugo-theme-stack
+# 網站語系設定
+# 參考 https://stack.jimmycai.com/config/i18n
+DefaultContentLanguage: zh-tw
+# 參考 https://gohugo.io/content-management/multilingual/#configure-languages
+# 因為 Hugo 預設的系統語言是英文，所以需要將預設的語言改成中文
+# defaultContentLanguage: zh-tw
+# languages:
+#   zh-tw:
+#     disabled: false
+#     weight: 1
+#     languageCode: zh-tw
+#     languageName: 中文
+#     title: "示範網站"
+
+params:
+  # 日期格式設定
+  # 參考 https://stack.jimmycai.com/config/date-format
+  dateFormat:
+    # po 文日期格式設定
+    published: 2006-01-02
+    # 最後更新時間格式設定
+    lastUpdated: 2006-01-02T15:04+0800
+  # 左邊選單設定
+  # 參考 https://stack.jimmycai.com/config/sidebar
+  sidebar:
+    # 設定網頁副標題
+    subtitle: 這是一個教學範例網站
+    # 設定網站頭像
+    avatar:
+      src: https://cdn3d.iconscout.com/3d/premium/thumb/boy-avatar-3d-icon-download-in-png-blend-fbx-gltf-file-formats--boys-male-man-pack-avatars-icons-5187865.png?f=webp
+      local: false
+  # PO 文相關設定
+  # 參考 https://stack.jimmycai.com/config/article
+  article:
+    # 文章目錄：開啟
+    toc: true
+    license:
+      # 顯示授權條款文字
+      enabled: true
+  # 小元件設定
+  # 參考 https://stack.jimmycai.com/config/widgets
+  widgets:
+    # 頁面設定（非首頁）
+    page:
+      # 顯示頁面的目錄
+      - type: toc
+    # 首頁設定
+    homepage:
+      # 搜尋元件
+      - type: search
+      # 歷史文庫
+      - type: archives
+        params:
+          # 顯示近 3 年的文章
+          limit: 3
+      # 分類元件設定
+      - type: categories
+        params:
+          # 最多顯示 5 個分類
+          limit: 5
+      # 標籤元件設定
+      - type: tag-cloud
+        params:
+          # 最多顯示 20 個標籤
+          limit: 20
+```
+
+結束執行並上版程式。
