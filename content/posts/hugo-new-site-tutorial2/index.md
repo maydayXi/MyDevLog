@@ -703,7 +703,7 @@ params:
       - type: search
 ```
 
-接下來建立一個供搜尋用的頁面，使用 hugo 建立新頁的指令 **hugo new content**，相關說明可以參考 **_[hugo new content](https://gohugo.io/commands/hugo_new_content/#hugo-new-content)_**
+接下來建立一個供搜尋用的頁面，使用 hugo 建立新頁的指令 **hugo new content**，相關說明可以參考 **_[hugo new content](https://gohugo.io/commands/hugo_new_content/#hugo-new-content)_**，在終端機輸入
 
 ```shell
 hugo new content content/page/search/index.md
@@ -738,7 +738,7 @@ params:
           limit: 3
 ```
 
-接下來在設定版面，要注意如果網站正在執行中要先停止執行，一樣使用 hugo new content 指令
+接下來在設定版面，要注意如果網站正在執行中要先停止執行，一樣使用 hugo new content 指令，在終端機輸入
 
 ```shell
 hugo new content content/page/archives/index.md
@@ -861,3 +861,120 @@ params:
 ```
 
 結束執行並上版程式。
+
+## colorSchema
+
+網站色系的設定，這個主題提供了兩種色系，亮跟暗，參考 **_[Color Schema configuration](https://stack.jimmycai.com/config/color-scheme)_**
+
+結構如下
+
+```yaml
+params:
+  colorSchema:
+    # 其他 colorSchema 設定
+```
+
+### toggle
+
+顯示切換色系的開關，預設是開啟的，所以不動
+
+```yaml
+params:
+  colorSchema:
+    # 如果不想要顯示色系切換的開關
+    toggle: false
+```
+
+![HugoSampleSite toggle](hugo-sample-site-toggle.png)
+
+### default
+
+預設的色系，有兩種情況
+
+1. toggle 設定關閉時候，要提供網站預設的色系
+2. 使用者第一次進入網站時候，預設的網站色系
+
+有 3 個值可以設定
+
+1. light：亮色系
+2. dark：暗色系
+3. auto：依系統設定的色系，預設的設定
+
+有開關可以切換，所以可以採用預設值
+
+```yaml
+params:
+  colorSchema:
+    # 如果想要讓使用者第一次進入網站顯示亮色系的話
+    default: light
+```
+
+### colorSchema 總結
+
+沒有做任何設定更改，所以不上傳版本控制。
+
+## menu
+
+左邊選單設定，也是最後一個要說明的設定。參考 **_[Custom menu](https://stack.jimmycai.com/config/menu)_**
+
+![Menu](menu.png)
+
+依官方的說明，如果你的選單連結要連到一個頁面的話，可以在頁面的最上方做選單的設定，在 hugo 中最上方的區塊叫 front matter，是頁面或文章的基礎設定，下一篇說明 po 文，會有更詳細的介紹，這裡可以先跟著做就好。
+
+### 首頁連結
+
+先增加首頁連結，在 **_[mainSections](#mainsections)_** 設定有提到，預設是呈現 po 文的頁面，所以要在 `content/post` 目錄下新增 `_index.md` 檔案。一以使用 hugo new content，在終端機輸入，至於為什麼是 `_index.md` 而不是 `index.md` 下一篇會再說明
+
+```shell
+hugo new content content/post/_index.md
+```
+
+接著開啟剛剛新增的檔案，輸入下面的內容，其實就是官方網站說明中的第一種設定方法，格式也是依照官方網站的設定，可以直接去網站上複製
+
+參數說明如下
+
+- name：連結上要呈現的名稱
+- weight: 連結的排序，數字越低排在越上面
+- icon：連結的圖示，home 是這個主題有提供的圖示檔，如果要放入自訂的圖示檔，要下載在`assets/icons` 下面
+
+```markdown
+---
+menu:
+  main:
+    name: 首頁
+    weight: 0
+    params:
+      icon: home
+---
+```
+
+儲存後執行，就可看到首頁的選項出現了
+
+![HugoSampleSite menu index](hugo-sample-site-menu-index.png)
+
+### 關於
+
+再來新增一個關於的連結，要在 `content/page/about/` 下新增一個 `index.md` 檔，在終端機輸入
+
+```shell
+hugo new content content/page/about/index.md
+```
+
+開啟剛剛新增的檔案，內容改成下面這樣
+
+```markdown
+---
+menu:
+  main:
+    name: 關於
+    weight: 1
+    params:
+      icon: user
+---
+```
+
+儲存後執行網站，可以看到關於的連結也出現了
+
+![HugoSampleSite menu about](hugo-sample-site-menu-about.png)
+
+結束執行後上版
