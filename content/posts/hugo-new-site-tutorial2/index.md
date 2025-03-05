@@ -978,3 +978,143 @@ menu:
 ![HugoSampleSite menu about](hugo-sample-site-menu-about.png)
 
 結束執行後上版
+
+# 佈署
+
+最後就剩佈署網站了，我們要將做好的網站佈署到 GitHub Pages 服務，參考 **_[Host on GitHub Pages](https://gohugo.io/hosting-and-deployment/hosting-on-github/)_**，可以直接跳到第 3 步開始做
+
+回到你的 GitHub Repository
+
+1. 找到 Settings 的標籤
+2. 左側有一個 Pages 的選項
+3. 找到 Build and deployment
+4. source 預設是 deploy from a branch，請選擇 GitHub Actions
+
+![GitHub Actions](github-actions.png)
+
+回到 Visual Studio Code，**請確定目前目錄是在網站的最上層**
+
+## 新增 workflows 目錄
+
+在終端機輸入
+
+```shell
+mkdir -p .github/workflows
+```
+
+## 新增 hugo.yaml 檔案
+
+在 `.github/workflows` 目錄下新增 `hugo.yaml` 檔案，在終端機輸入
+
+```shell
+touch .github/workflows/hugo.yaml
+```
+
+## 新增佈署設定檔內容
+
+將下面的內容貼到剛剛新增的 `hugo.yaml` 檔
+
+```yaml
+# Sample workflow for building and deploying a Hugo site to GitHub Pages
+name: Deploy Hugo site to Pages
+
+on:
+  # Runs on pushes targeting the default branch
+  push:
+    branches:
+      - main
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+# Default to bash
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  # Build job
+  build:
+    runs-on: ubuntu-latest
+    env:
+      HUGO_VERSION: 0.141.0
+    steps:
+      - name: Install Hugo CLI
+        run: |
+          wget -O ${{ runner.temp }}/hugo.deb https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.deb \
+          && sudo dpkg -i ${{ runner.temp }}/hugo.deb
+      - name: Install Dart Sass
+        run: sudo snap install dart-sass
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v5
+      - name: Install Node.js dependencies
+        run: "[[ -f package-lock.json || -f npm-shrinkwrap.json ]] && npm ci || true"
+      - name: Build with Hugo
+        env:
+          HUGO_CACHEDIR: ${{ runner.temp }}/hugo_cache
+          HUGO_ENVIRONMENT: production
+          TZ: America/Los_Angeles
+        run: |
+          hugo \
+            --gc \
+            --minify \
+            --baseURL "${{ steps.pages.outputs.base_url }}/"
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./public
+
+  # Deployment job
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+```
+
+儲存後，再做一次程式上版流程，不過這次要上版的東西是佈署的相關設定檔，在終端機輸入
+
+```shell
+git add .
+git add commit -m "Create github workflow configuration for GitHub Actions deploy website"
+git push
+```
+
+接著回到 GitHub Repository，就會發現開始佈署了
+
+![GitHub Actions deploy](github-actions-deploy.png)
+
+佈署完成
+
+![GitHub Actions deploy finished](github-actions-deploy-finished.png)
+
+最後回到 **_[佈署](#佈署)_** 一開始設定 GitHub Actions 的地方，會發現多出一個區塊，也就是你線上的網址，點 「Visit site」就可以確認是否有佈署成功了。
+
+![Visit Site](hugo-sample-site-visit-site.png)
+
+![HugoSampleSite](final.png)
+
+下一篇會說明如何撰寫 po 文，希望各位都有順利設定並佈署完成
