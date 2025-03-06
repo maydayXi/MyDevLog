@@ -90,7 +90,7 @@ console.log("Hello world");
 
 ### 字型樣式
 
-有兩種\
+有兩種
 
 1. 粗體：兩個星號「\*\*」
 2. 斜體：一個底線「\_」
@@ -119,7 +119,7 @@ _斜體 - 一個底線_
 ### 圖片
 
 跟超連結很像，在最前面加上「!」而已\
-\!\[圖片載入失敗要顯示的文字\]\(圖片網址\)\
+**\!\[圖片載入失敗要顯示的文字\]\(圖片網址\)**\
 以套用的主題圖片為例
 
 ![Hugo-Theme-Stack](https://user-images.githubusercontent.com/5889006/190859441-141b5f81-8483-40d2-bd96-ebf85616a46d.png)
@@ -258,6 +258,65 @@ menu:
 <!-- 其它標題及內容 -->
 ```
 
-設定完後儲存，切回瀏覽器，就會看到出現了相關的頁面資訊，關於就完成了，可以結束執行並上傳程式版本到 GitHub
+設定完後儲存，切回瀏覽器，就會看到出現了相關的頁面資訊，關於就完成了，可以結束執行並上傳程式版本到 GitHub，並觀察佈署的情況，確認佈署完後驗證網頁是否有上傳成功。
 
 ![HugoSampleSite final](hugo-sample-site-final.png)
+
+## Front Matter
+
+接下來要詳細的說明 Front Matter，第一篇建立網站的時候，有一個網頁設定檔 `hugo.yaml`，**所以可以把 Front Matter 想成是單一網頁的設定檔，而它也有特定的格式，預設是 toml（用 +++ 區隔），但也可以改成 yaml（用- - - 區隔），由於是寫在 Markdown 檔案中，所以要區隔開來**，因為我比較的慣用 yaml，所以之後都會用 yaml 的格式寫
+
+### Front Matter 預設值
+
+每使用 **hugo new content** 新增一篇 PO 文，都會看到 1 檔案中有預設的設定，這是可以改的，在網站的 `archetypes/default.md` 檔，開啟後就會看到預設的設定
+
+```markdown
++++
+date = '{{ .Date }}'
+draft = true
+title = '{{ replace .File.ContentBaseName "-" " " | title }}'
++++
+```
+
+先把它改成下面的樣子，讓它變成 `yaml` 的格式
+
+```markdown
+---
+date: "{{ .Date }}"
+draft: true
+title: '{{ replace .File.ContentBaseName "-" " " | title }}'
+---
+```
+
+這裡先說明一個屬性 **draft** 就是草稿，**hugo 不會產生出草稿狀態的網頁**，所以如果想要發佈某個文章的話，需要將它改成 **false**，下面設定讓它一開始就不是草稿狀態
+
+```markdown
+date: "{{ .Date }}"
+draft: false
+title: '{{ replace .File.ContentBaseName "-" " " | title }}'
+```
+
+### Front Matter 其他設定
+
+再來看看其它設定，下面說明我常用到的 3 個
+
+1. **categories： PO 文的分類**
+2. **tags: PO 文的標籤**
+3. **image: PO 文的縮圖**
+
+可以發現上面這三個設定，在第一篇網站設定裡也有相關的設定，**其中第 3 個 image 對應到的就是在 `hugo.yaml` 中的 featuredImageField**
+
+接下來將上面的 3 個設定寫入 `default.md` 裡，預設都先不給值，因為在寫 PO 文的時候才會知道文章要分在哪一類，給哪一個標籤。
+
+```markdown
+---
+date: "{{ .Date }}"
+draft: false
+title: '{{ replace .File.ContentBaseName "-" " " | title }}'
+categories:
+tags:
+image:
+---
+```
+
+好了就可以儲存了，接著就要開始寫第一篇 PO 文了。這裡我再一次上版。
