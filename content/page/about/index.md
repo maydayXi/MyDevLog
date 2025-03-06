@@ -2,6 +2,7 @@
 title: 關於
 description: 自我介紹
 date: "2025-03-03"
+lastmod: 2025-03-06T10:53:08
 menu:
   main:
     name: "關於"
@@ -17,12 +18,12 @@ links:
 
 # 簡介
 
-我是一名技術愛好者，同時也是一名開發人員。我有程式及網頁開發的背景，在[臺中科技大學](https://www.nutc.edu.tw/)完成了[資訊管理](https://im.nutc.edu.tw/)的學士學位
+我是一名技術愛好者，同時也是一名開發人員。我有程式及網頁開發的背景，在 **_[臺中科技大學](https://www.nutc.edu.tw/)_** 完成了 **_[資訊管理](https://im.nutc.edu.tw/)_** 的學士學位
 。
 
-我在銀行的資訊部門累積了 5 年的工作經驗，負責網頁程式開發，主要使用的語言有 [C#](https://learn.microsoft.com/zh-tw/dotnet/csharp/)、[JavaScript](https://developer.mozilla.org/zh-TW/docs/Web/JavaScript)。
-同時也會使用 [HTML](https://developer.mozilla.org/zh-TW/docs/Web/HTML)、[CSS](https://developer.mozilla.org/zh-TW/docs/Web/CSS)來建構使用者介面
-。閒暇時，也會研究 [ASP.NET](https://learn.microsoft.com/zh-tw/aspnet/overview) 及演算法的相關技術。
+我在銀行的資訊部門累積了 5 年的工作經驗，負責網頁程式開發，主要使用的語言有 **_[C#](https://learn.microsoft.com/zh-tw/dotnet/csharp/)_**、**_[JavaScript](https://developer.mozilla.org/zh-TW/docs/Web/JavaScript)_**。
+同時也會使用 **_[HTML](https://developer.mozilla.org/zh-TW/docs/Web/HTML)_**、**_[CSS](https://developer.mozilla.org/zh-TW/docs/Web/CSS)_** 來建構使用者介面
+。閒暇時，也會研究 **_[ASP.NET](https://learn.microsoft.com/zh-tw/aspnet/overview)_** 及演算法的相關技術。
 
 歡迎直接瀏覽我的 GitHub。
 
