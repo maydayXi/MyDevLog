@@ -9,6 +9,11 @@ tags:
   - Hugo
   - Markdown
 image: markdown-featured-image.png
+links:
+  - title: Hugo-sample-site
+    description: GitHub 專案源始碼
+    website: https://github.com/maydayXi/Hugo-sample-site
+    image: https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png
 ---
 
 # 前情提要
@@ -268,7 +273,7 @@ menu:
 
 ### Front Matter 預設值
 
-每使用 **hugo new content** 新增一篇 PO 文，都會看到 1 檔案中有預設的設定，這是可以改的，在網站的 `archetypes/default.md` 檔，開啟後就會看到預設的設定
+每使用 **hugo new content** 新增一篇 PO 文，都會看到檔案中有預設的設定，這是可以改的，在網站的 `archetypes/default.md` 檔，開啟後就會看到預設的設定
 
 ```markdown
 +++
@@ -304,7 +309,7 @@ title: '{{ replace .File.ContentBaseName "-" " " | title }}'
 2. **tags: PO 文的標籤**
 3. **image: PO 文的縮圖**
 
-可以發現上面這三個設定，在第一篇網站設定裡也有相關的設定，**其中第 3 個 image 對應到的就是在 `hugo.yaml` 中的 featuredImageField**
+可以發現上面這三個設定，在上一篇主題設定裡也有相關的設定，**其中第 3 個 image 對應到的就是在 `hugo.yaml` 中的 featuredImageField**
 
 接下來將上面的 3 個設定寫入 `default.md` 裡，預設都先不給值，因為在寫 PO 文的時候才會知道文章要分在哪一類，給哪一個標籤。
 
@@ -319,4 +324,316 @@ image:
 ---
 ```
 
-好了就可以儲存了，接著就要開始寫第一篇 PO 文了。這裡我再一次上版。
+當然也可以添加其他設定，可以參考 **_[Front Matter Overview](https://gohugo.io/content-management/front-matter/#overview)_**，好了就可以儲存了，接著就要開始寫第一篇 PO 文了。這裡我再一次上版。
+
+# 第一篇 PO 文
+
+接著我們以「介紹 Hugo」這個題材為為第一篇貼文，貼文統一放在 `content/post` 目錄
+在 Visual Studio Code 開啟終端機，輸入 **hugo new content**
+
+```shell
+hugo new content content/post/what-is-hugo/index.md
+```
+
+開啟剛剛新增的 `index.md` 檔案，如果有看到 Front Matter 預設跟上一節設定的一樣，就表示 Front Matter 的設定有成功
+
+![HugoSampleSite what is hugo](hugo-sample-site-whatishugo.png)
+
+## 設定 Front Matter
+
+我們需要**設定貼文的標籤跟分類及副標題，日期會自動套用新增這個檔案的時間，標題會自動套用這個檔案的名稱，所以如果要改標題再修改**
+
+- 分類：因為是技術相關，所以設成「**Tech**」
+- 標籤：**Hugo、Markdown**，因為是介紹 Hugo 為主題，而 Hugo 使用 Markdown 篇寫貼文及頁面
+
+這裡說明一下分類跟標籤的差別\
+**分類通常是範圍比較大的**，如技術、管理、商業，所以分類通常會設定比較少（1 ~ 2 個分類）\
+**標籤通常是範圍比較小的**，如什麼樣的技術，什麼樣的工具，所以標籤會設定比較多
+
+由於分類及籤都可以設定多個值，所以每一個值要使用「**-**」開頭，包在相關設定的下方
+
+```markdown
+---
+date: "2025-03-06T21:05:37+08:00"
+draft: false
+title: "What Is Hugo"
+categories:
+  - Tech
+tags:
+  - Hugo
+  - Markdown
+image:
+---
+```
+
+再來設定貼文的縮圖，在網路上找免費使用的圖庫，下載一張到這個貼文所在的目錄 `content/post/what-is-hugo`，這樣貼文才會讀得到
+
+## Page Bundle
+
+這邊要介紹 Hugo 的打包方式，有兩種，可以參考 **_[Hugo Page Bundle](https://gohugo.io/content-management/page-bundles/#article)_**
+
+1. **leaf bundle：給單一網頁使用的**，像是一般的貼文，或是「關於」單一的介紹頁面，這類型的**網頁圖片也需要放在同一個目錄下，而它的頁面檔案名稱一定要是「`index.md`」**
+
+2. **branch bundle：一個頁面下含有其他子網頁，像我們的首頁，可以看到很多貼文，可以在點某一個貼文進來瀏覽貼文內谷。這種類的檔案名稱一定要是「`\_index.md`」，這也是我們上一篇在建立首頁時檔案名稱一定要加「\_」的原因，也因為他可以有其他子網頁的原因，所以可以在包含其他目錄**
+
+上一篇主題設定的地方，有一個設定是 **mainSections，預設是 post，所以會呈現 post 下的 `_index.md` 或 `index.md`** 但我們希望首頁可以有多個貼文讓使用者瀏覽，所以才會新增 `_index.md` 的檔案並且只設定 menu 並沒有設定其他內容
+
+![HugoSampleSite page bundle](hugo-sample-site-page-bundle.png)
+
+從上面的目錄可以看得出來，如果要在新增第二篇貼文，就要在 `post/` 目錄下新增另一個目錄（如：`second-post`），在 `second-post` 目錄下新增 `index.md` 檔案及相關資源
+
+圖片下載到跟貼文一樣的目錄後，在 **image:** 加上圖片的檔名，儲存後執行網站
+
+```markdown
+image: "image-file-name.png"
+```
+
+會看到縮圖跟 Tech 分類都出現了，接著點進貼文
+
+![HugoSampleSite featured image](hugo-sample-site-featured-image-finished.png)
+
+會看到貼文最上方有縮圖，最下方有標籤，當然現在沒有任何內容所以沒有目錄，接下來開始新超內容
+
+![HugoSampleSite featured image and tags](hugo-sample-site-featured-image-final.png)
+
+## 第一段「Hugo 是什麼」
+
+新增一個二級標題「Hugo 是什麼？」開頭，接著新增簡介如下\
+Hugo 是一款以 **Go 語言開發的靜態網站產生器（Static Site Generator, SSG）**，以 **快速、輕量** 著稱，**適合部落格、文件網站、個人作品集**等用途。
+
+```markdown
+## Hugo 是什麼
+
+Hugo 是一款以 **Go 語言開發的靜態網站產生器（Static Site Generator, SSG）**，以 **快速、輕量** 著稱， **適合部落格、文件網站、個人作品集** 等用途。
+```
+
+### 新增「為什麼選擇 Hugo」
+
+在第一段下方新增 3 級標題「為什麼選擇 Hugo」
+
+```markdown
+### 為什麼選擇 Hugo
+```
+
+#### 新增無編號清單項目
+
+在 3 級標題下新增 6 個無編號清單項目，並且將項目標題粗體化如下
+
+- **超高速編譯**：Hugo 只需毫秒級的時間即可重新生成整個網站。
+- **單一執行檔**：無需額外安裝繁瑣的依賴套件。
+- **Markdown 支援**：讓你能夠專注於內容創作。
+- **內建開發伺服器**：支援即時預覽，提升開發效率。
+- **靈活的內容管理**：可透過 `content/` 目錄組織內容。
+
+```markdown
+- **超高速編譯**：Hugo 只需毫秒級的時間即可重新生成整個網站。
+- **單一執行檔**：無需額外安裝繁瑣的依賴套件。
+- **Markdown 支援**：讓你能夠專注於內容創作。
+- **內建開發伺服器**：支援即時預覽，提升開發效率。
+- **靈活的內容管理**：可透過 `content/` 目錄組織內容。
+```
+
+#### 新增 Hugo 官方網站超連結
+
+在項目清單的下方空一行並新增官方網站超連結「https://gohugo.io/」如下
+
+```markdown
+更多詳細資訊可以參考 **_[Hugo 官方網站](https://gohugo.io/)_**
+```
+
+## 第二段「Hugo 的核心功能」
+
+新增第二個二級標題「Hugo 的核心功能」並輸入下面的內容
+
+```markdown
+## Hugo 的核心功能
+
+Hugo 提供許多強大的功能，使開發靜態網站變得簡單且高效。
+```
+
+### 新增四個 3 級標題
+
+新增四個 3 級標題
+
+1. 內容管理系統
+2. 強大的模板系統
+3. 多語系支援
+4. SEO 友善
+
+並輸入內容如下
+
+```markdown
+### 內容管理系統
+
+Hugo 採用 **Front Matter（前置資料）**，支援 YAML、TOML 和 JSON 格式，讓你可以自訂每篇文章的標題、日期、分類等屬性。
+
+### 強大的模板系統
+
+Hugo 使用 Go 的模板語法來建立頁面，並內建 `layouts/` 目錄讓開發者自訂樣板。
+
+### 多語系支援
+
+Hugo 內建國際化功能，可以輕鬆建立多語系網站。
+
+### SEO 友善
+
+Hugo 預設提供 **靜態網址、meta 標籤管理、站點地圖** 等功能，幫助網站在搜尋引擎上獲得更好的排名。
+```
+
+### 新增介紹影片
+
+在第四個 3 級標題下方空一行，新增說明並加入介紹影片\
+新增影片的語法是 **\{\{\<youtube ID\>\}\}**，影片 id 是 Youtube **網址最後 `?v=` 後的一串亂碼**\
+我找到的 Id 是 `0RKpf3rK57I`
+如下
+
+```markdown
+你可以觀看這部影片來更深入了解 Hugo：
+
+<!-- youtube 的嵌入語法會渲染出來，應該是 bug，請用上面的文字自行更改 -->
+```
+
+## 第三段「Hugo 主題介紹」
+
+新增第三個 2 級標題「Hugo 主題介紹」，並輸入下面的內容
+
+```markdown
+## Hugo 主題介紹
+
+Hugo 有大量 **免費與開源的主題** 可供選擇，能夠快速讓網站呈現專業的外觀。
+```
+
+### 新增「如何選擇適合的 Hugo 主題？」
+
+在第三段下新增一個 3 級標題「如何選擇適合的 Hugo 主題？」，並加入 3 個編號清單如下
+
+1. 瀏覽官方主題庫：Hugo Themes
+2. 考慮需求：是否需要部落格、作品集、文件網站等功能？
+3. 測試與自訂：下載後可以透過 config.toml 來調整主題設定。
+
+將 **Hugo Theme** 超連結並粗體化，網址「https://themes.gohugo.io/」
+
+```markdown
+1. 瀏覽官方主題庫：**[Hugo Themes](https://themes.gohugo.io/)**
+2. 考慮需求：是否需要部落格、作品集、文件網站等功能？
+3. 測試與自訂：下載後可以透過 config.toml 來調整主題設定。
+```
+
+### 新增「熱門的主題推薦」
+
+在第三段中新都第二個 3 級標題，「熱門主題推薦」，以無項目清單列出主題網站中的前三名
+並加入圖片，**下面示範以圖片網址的方式載入圖片，也可以將圖片下載到自己的貼文目錄下綀習 page bundle 的載入方法**
+
+```markdown
+### 熱門的主題推薦
+
+- PaperMod
+
+  ![PaperMod](https://themes.gohugo.io/themes/hugo-papermod/screenshot_hu16715360367159211822.png)
+
+- Hugo Blox - Tailwind
+
+  ![Hugo Blox - Tailwind](https://themes.gohugo.io/themes/blox-tailwind/screenshot_hu1041212413243204812.png)
+
+- Stack
+
+  ![Stack](https://themes.gohugo.io/themes/hugo-theme-stack/screenshot_hu17931748369235561047.png)
+```
+
+## 第一篇 PO 文總結
+
+完成後的結果會像下面這樣
+
+```markdown
+---
+date: "2025-03-06T21:05:37+08:00"
+draft: false
+title: "What Is Hugo"
+categories:
+  - Tech
+tags:
+  - Hugo
+  - Markdown
+image: hugo-sample-site-featured-image.jpg
+---
+
+## Hugo 是什麼
+
+Hugo 是一款以 **Go 語言開發的靜態網站產生器（Static Site Generator, SSG）**，以 **快速、輕量** 著稱， **適合部落格、文件網站、個人作品集** 等用途。
+
+### 為什麼選擇 Hugo
+
+- **超高速編譯**：Hugo 只需毫秒級的時間即可重新生成整個網站。
+- **單一執行檔**：無需額外安裝繁瑣的依賴套件。
+- **Markdown 支援**：讓你能夠專注於內容創作。
+- **內建開發伺服器**：支援即時預覽，提升開發效率。
+- **靈活的內容管理**：可透過 `content/` 目錄組織內容。
+
+更多詳細資訊可以參考 **_[Hugo 官方網站](https://gohugo.io/)_**
+
+## Hugo 的核心功能
+
+Hugo 提供許多強大的功能，使開發靜態網站變得簡單且高效。
+
+### 內容管理系統
+
+Hugo 採用 **Front Matter（前置資料）**，支援 YAML、TOML 和 JSON 格式，讓你可以自訂每篇文章的標題、日期、分類等屬性。
+
+### 強大的模板系統
+
+Hugo 使用 Go 的模板語法來建立頁面，並內建 `layouts/` 目錄讓開發者自訂樣板。
+
+### 多語系支援
+
+Hugo 內建國際化功能，可以輕鬆建立多語系網站。
+
+### SEO 友善
+
+Hugo 預設提供 **靜態網址、meta 標籤管理、站點地圖** 等功能，幫助網站在搜尋引擎上獲得更好的排名。
+
+你可以觀看這部影片來更深入了解 Hugo：
+
+<!-- youtube 影片嵌入語法 -->
+
+## Hugo 主題介紹
+
+Hugo 有大量 **免費與開源的主題** 可供選擇，能夠快速讓網站呈現專業的外觀。
+
+1. 瀏覽官方主題庫：**[Hugo Themes](https://themes.gohugo.io/)**
+2. 考慮需求：是否需要部落格、作品集、文件網站等功能？
+3. 測試與自訂：下載後可以透過 config.toml 來調整主題設定。
+
+### 熱門的主題推薦
+
+- PaperMod
+
+  ![PaperMod](https://themes.gohugo.io/themes/hugo-papermod/screenshot_hu16715360367159211822.png)
+
+- Hugo Blox - Tailwind
+
+  ![Hugo Blox - Tailwind](https://themes.gohugo.io/themes/blox-tailwind/screenshot_hu1041212413243204812.png)
+
+- Stack
+
+  ![Stack](https://themes.gohugo.io/themes/hugo-theme-stack/screenshot_hu17931748369235561047.png)
+```
+
+接著就可以儲存看執行結果了
+
+![HugoSampleSite first post](hugo-sample-site-first-post.png)
+
+確認沒有問題後，就可以結束執行並進行最後一版程式上版了。
+
+在上傳的時候，可能會碰到一個問題，**如果有圖片是第一次上傳的話容易出現錯誤，因為 git 預設的上傳大小只有 1mb，所以如果圖片超過這個大小的話會上傳失敗，請用下面的語法將上傳的容量提到 10 mb**
+
+```shell
+git config http.postBuffer 10485760
+```
+
+最後在終端機輸入指令上傳並佈署
+
+```shell
+git add .
+git commit -m "Add first post"
+git push
+```
