@@ -3,6 +3,7 @@ date: "2025-03-06T11:52:35+08:00"
 draft: false
 title: Hugo 架站教學 - PO 文撰寫
 description: 輕鬆創建你的部落格內容
+lastmod: 2025-03-07T16:14:57
 categories:
   - WebSite
 tags:
@@ -392,7 +393,7 @@ image: "image-file-name.png"
 
 ![HugoSampleSite featured image](hugo-sample-site-featured-image-finished.png)
 
-會看到貼文最上方有縮圖，最下方有標籤，當然現在沒有任何內容所以沒有目錄，接下來開始新超內容
+會看到貼文最上方有縮圖，最下方有標籤，當然現在沒有任何內容所以沒有目錄，接下來開始新增內容
 
 ![HugoSampleSite featured image and tags](hugo-sample-site-featured-image-final.png)
 
@@ -637,3 +638,7 @@ git add .
 git commit -m "Add first post"
 git push
 ```
+
+# 後記
+
+恭喜各位順利完成這一步，看完了 Hugo 架站三部曲，希望可以幫助你了解 Hugo，並且利順架出自己網站，如果有任何問題，歡迎來信討問，祝福大家打造出屬於自己的天地
