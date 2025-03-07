@@ -142,6 +142,25 @@ params:
     content:
       # Enable image processing for images in content.
       enabled: true
+  # Comments system using giscus
+  # See https://giscus.app/zh-TW
+  # Also see https://github.com/CaiJimmy/hugo-theme-stack/blob/master/config.yaml#L38
+  comments:
+    enabled: true
+    provider: giscus
+    giscus:
+      repo: maydayXi/MyDevLogComments
+      repoIdD: R_kgDOOEwRQg
+      category: Announcements
+      categoryID: DIC_kwDOOEwRQs4Cnqwr
+      mapping: pathname
+      strict: 0
+      reactionEnabled: 1
+      emitMetadata: 0
+      inputPosition: bottom
+      lightTheme: light
+      darkTheme: dark_dimmed
+      lang: zh-TW
 
 ### Custom Menu
 ### See https://stack.jimmycai.com/config/menu
