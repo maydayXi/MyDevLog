@@ -150,7 +150,7 @@ params:
     provider: giscus
     giscus:
       repo: maydayXi/MyDevLogComments
-      repoIdD: R_kgDOOEwRQg
+      repoID: R_kgDOOEwRQg
       category: Announcements
       categoryID: DIC_kwDOOEwRQs4Cnqwr
       mapping: pathname
