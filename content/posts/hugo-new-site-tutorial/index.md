@@ -12,7 +12,7 @@ tags:
   - GitHub
   - GitHub Pages
   - Terminal
-image: hugo-logo.png
+image: first-tutorial-featured-image.jpg
 links:
   - title: Hugo-sample-site
     description: GitHub 專案源始碼
