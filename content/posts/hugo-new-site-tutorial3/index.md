@@ -24,7 +24,7 @@ categories:
 tags:
   - Hugo
   - Markdown
-image: markdown-featured-image.png
+image: https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial3/markdown-featured-image.png
 links:
   - title: Hugo-sample-site
     description: GitHub 專案源始碼
