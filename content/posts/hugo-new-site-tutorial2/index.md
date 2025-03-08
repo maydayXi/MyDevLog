@@ -3,6 +3,7 @@ date: "2025-03-04T10:16:11+08:00"
 draft: false
 title: "Hugo 架站教學 - 主題設定"
 description: Hugo 主題設置 - 個人化自己的網站
+slug: hugo-tutorial-theme-deploy
 lastmod: "2025-03-04T18:05:29+0800"
 sitemap:
   - changeFreq: monthly

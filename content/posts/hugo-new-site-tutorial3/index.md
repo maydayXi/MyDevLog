@@ -3,6 +3,7 @@ date: "2025-03-06T11:52:35+08:00"
 draft: false
 title: Hugo 架站教學 - PO 文撰寫
 description: 輕鬆創建你的部落格內容
+slug: hugo-tutorial-first-post
 lastmod: 2025-03-07T16:14:57
 sitemap:
   - changeFreq: monthly

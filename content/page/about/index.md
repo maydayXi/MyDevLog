@@ -3,6 +3,7 @@ title: 關於
 description: 自我介紹
 date: "2025-03-03"
 lastmod: 2025-03-06T10:53:08
+slug: about
 menu:
   main:
     name: "關於"

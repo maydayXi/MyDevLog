@@ -29,6 +29,10 @@ services:
   googleAnalytics:
     id:
 
+permalinks:
+  page: /:slug/
+  posts: /posts/:slug/
+
 # Control pagination behavior
 # See https://gohugo.io/templates/pagination/#configuration
 pagination:
