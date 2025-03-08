@@ -16,6 +16,9 @@ keywords:
   - Hugo post
   - Hugo PO 文
   - Hugo 部落格貼文
+  - Markdown
+  - Markdown 語法
+  - Markdown 教學
 categories:
   - WebSite
 tags:
