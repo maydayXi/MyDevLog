@@ -75,7 +75,7 @@ brew install hugo
 hugo version
 ```
 
-![hugo version 有版本號詳細資訊代表安裝成功](hugo-version.png)
+![hugo version 有版本號詳細資訊代表安裝成功](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial/hugo-version.png)
 
 ## 安裝 Git
 
@@ -93,7 +93,7 @@ brew install git
 $ git --version
 ```
 
-![Git version 有出現版本號 代表安裝成功](git-version.png)
+![Git version 有出現版本號 代表安裝成功](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial/git-version.png)
 
 # 建立 Repository
 
@@ -110,17 +110,17 @@ Repository 可以想像是程式碼儲存目錄，又分成下面兩種
 
 到 Github 自己帳號的首頁，找到「**+ ▼**」，選「**New repository**」
 
-![New Repository](create-new-repository.png)
+![New Repository](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial/create-new-repository.png)
 
 接著在「**Repository name**」輸入名稱，然後按下「**Create repository**」
 
-![Input Repository name](create-repository.png)
+![Input Repository name](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial/create-repository.png)
 
 ## 新增本機 Repository
 
 在建立完 GitHub 的 Repository 後，會看如下的畫面，由於是新建立網站專案，所以要選上面那一個，複製它
 
-![Create Local Repository Command Line](create-local-repository.png)
+![Create Local Repository Command Line](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial/create-local-repository.png)
 
 開啟終端機，先建立本機目錄，這邊以 `Documents/HugoSampleSite` 為例，也可以建立在其他自己想要的位置
 
@@ -135,7 +135,7 @@ mkdir HugoSampleSite
 cd HugoSampleSite
 ```
 
-![Create local directory](create-local-directory.png)
+![Create local directory](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial/create-local-directory.png)
 
 ## 同步 Repository
 
@@ -151,11 +151,11 @@ git remote add origin https://github.com/maydayXi/Hugo-sample-site.git
 git push -u origin main
 ```
 
-![Remote repository](remote-repository.png)
+![Remote repository](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial/remote-repository.png)
 
 完成後到 GitHub 網站上重新整理，如果出現下面的畫面就表示同步成功了
 
-![Remote finished](remote-finished.png)
+![Remote finished](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial/remote-finished.png)
 
 # 建立 Hugo 網站
 
@@ -181,7 +181,7 @@ pwd
 cd ..
 ```
 
-![Change to parent directory](change-directory.png)
+![Change to parent directory](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial/change-directory.png)
 
 ## 建立網站-強制
 
@@ -207,11 +207,11 @@ hugo new site HugoSampleSite --force
 
 原因在於 **hugo new site path** 只能建立在空的目錄，參考 **_[hugo new site](https://gohugo.io/commands/hugo_new_site/#hugo-new-site)_** 說明，如果沒有加 **--force** 會出現錯誤訊息
 
-![Hugo new site error](hugo-new-site-error.png)
+![Hugo new site error](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial/hugo-new-site-error.png)
 
 在強制建立完成後，如果有看到 **Just a few more step** 的相關訊息，就是建立完成，也可以開啟網站所在目錄，確認網站建立完成
 
-![HugoSampleSite](hugo-sample-site.png)
+![HugoSampleSite](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial/hugo-sample-site.png)
 
 # 第一版程式上傳
 
@@ -251,11 +251,11 @@ git commit -m "init commit"
 git push
 ```
 
-![Git init commit and push](git-init-commit-push.png)
+![Git init commit and push](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial/git-init-commit-push.png)
 
 回到 GitHub Repository 確認上傳成功
 
-![GitHub init commit](github-init-commit.png)
+![GitHub init commit](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial/github-init-commit.png)
 
 # 套用主題
 
@@ -272,7 +272,7 @@ git push
 
 兩種安裝方式的差異非本次重點，有興趣可以自行研究。
 
-![Hugo-Theme-Stack-Installation](hugo-theme-stack-installation.png)
+![Hugo-Theme-Stack-Installation](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial/hugo-theme-stack-installation.png)
 
 複製指令後，回到終端機，確認目前所在目錄是網站的根目錄，將複製的指令（或下方）貼上執行
 
@@ -282,7 +282,7 @@ git submodule add https://github.com/CaiJimmy/hugo-theme-stack/ themes/hugo-them
 
 成功安裝會看到下面的畫面
 
-![Hugo-Theme-Stack installed](hugo-theme-stack-installed.png)
+![Hugo-Theme-Stack installed](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial/hugo-theme-stack-installed.png)
 
 最後在根目錄下找到網站的設定檔 **hugo.toml**（通常會是這個名字），用編輯器或 IDE 打開，我使用的是 **_[Visual Studio Code](https://code.visualstudio.com/)_**，也可以使用其他的編輯器，加入下方的文字設定網站要套用的主題
 
@@ -290,7 +290,7 @@ git submodule add https://github.com/CaiJimmy/hugo-theme-stack/ themes/hugo-them
 theme = 'hugo-theme-stack'
 ```
 
-![HugoSampleSite hugo-theme-stack configuration](hugo-theme-stack-configuration.png)
+![HugoSampleSite hugo-theme-stack configuration](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial/hugo-theme-stack-configuration.png)
 
 # 編譯並執行
 
@@ -307,9 +307,9 @@ theme = 'hugo-theme-stack'
 hugo
 ```
 
-![HugoSampleSite build](hugo-sample-site-build.png)
+![HugoSampleSite build](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial/hugo-sample-site-build.png)
 
-![HugoSampleSite public](hugo-sample-site-public.png)
+![HugoSampleSite public](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial/hugo-sample-site-public.png)
 
 也可以直接下 **hugo server**，編譯並執行，會在本機端建立一個模擬的伺服器
 
@@ -317,7 +317,7 @@ hugo
 hugo server
 ```
 
-![HugoSampleSite hugo server](hugo-sample-site-server.png)
+![HugoSampleSite hugo server](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial/hugo-sample-site-server.png)
 
 在瀏覽器中輸入上圖的網址「**http://localhost:port**」port 可能會不一樣，就可以看到執行的結果了
 
@@ -348,11 +348,11 @@ hugo server
 
 .gitignore 檔是告訴 git 有哪些檔案或目錄不需要版本控制，這裡可以直接複製剛剛安裝的主題在 `theme/hugo-theme-stack/` 下有一個 `.gitignore` 檔，它是一個隱藏的檔案，需要設定把隱藏拿掉才看得到。
 
-![.gitignore](hugo-theme-stack-gitignore.png)
+![.gitignore](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial/hugo-theme-stack-gitignore.png)
 
 把 `.gitignore` 複製到網站根目錄下。
 
-![HugoSampleSite gitignore](hugo-sample-site-gitignore.png)
+![HugoSampleSite gitignore](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial/hugo-sample-site-gitignore.png)
 
 ## 上傳第二版
 
@@ -365,7 +365,7 @@ git commit -m "Add hugo-theme-stack"
 
 最後到 GitHub Repository 確認上傳結果
 
-![GitHub Second Commit](github-second-commit.png)
+![GitHub Second Commit](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial/github-second-commit.png)
 
 # 完成
 
