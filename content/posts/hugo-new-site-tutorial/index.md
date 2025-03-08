@@ -21,7 +21,7 @@ tags:
   - GitHub
   - GitHub Pages
   - Terminal
-image: first-tutorial-featured-image.jpg
+image: https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial/first-tutorial-featured-image.jpg
 links:
   - title: Hugo-sample-site
     description: GitHub 專案源始碼

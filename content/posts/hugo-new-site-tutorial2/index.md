@@ -51,7 +51,7 @@ links:
 
 1. 開啟 Visual Studio Code，開啟終端機「**control + `(數字 1 的左邊)**」
 
-![Visual Studio Code terminal](vscode-terninal.png)
+![Visual Studio Code terminal](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial2/vscode-terninal.png)
 
 2. 切換 HugoSampleSite 目錄
 
@@ -71,7 +71,7 @@ cd Documents/HugoSampleCode
 code -r .
 ```
 
-![Visual Studio Code open HugoSampleSite](vscode-open-hugo-sample-site.png)
+![Visual Studio Code open HugoSampleSite](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial2/vscode-open-hugo-sample-site.png)
 
 開啟後可以看到左邊 **檔案總管** 有完整的專案目錄
 
@@ -88,7 +88,7 @@ code -r .
 theme = 'hugo-theme-stack'
 ```
 
-![hugo.toml](hugo.toml.png)
+![hugo.toml](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial2/hugo.toml.png)
 
 到 **_[Stack 主題官網設定說明](https://stack.jimmycai.com/config/)_**，可以看到設定檔接受 3 種格式，可以選擇自己喜歡或習慣的格式來調整。
 
@@ -98,7 +98,7 @@ theme = 'hugo-theme-stack'
 
 由於我比較習慣 yaml，所以我會先把 toml 轉成 toml，網路上有很多轉換工具，如 **_[https://transform.tools/toml-to-yaml](https://transform.tools/toml-to-yaml)_** 將設定檔內容做轉換，並將 `hugo.toml` 存成 `hugo.yaml`
 
-![hugo.toml to hugo.yaml](toml-to-yaml.png)
+![hugo.toml to hugo.yaml](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial2/toml-to-yaml.png)
 
 ## 預設的設定
 
@@ -130,7 +130,7 @@ title: HugoSampleSite
 hugo server
 ```
 
-![HugoSampleSite Title](hugo-sample-site-title.png)
+![HugoSampleSite Title](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial2/hugo-sample-site-title.png)
 
 ### theme
 
@@ -157,7 +157,7 @@ Stack 主題使用 **_[i18n](https://stack.jimmycai.com/config/i18n)_** 來設�
 DefaultContentLanguage: zh-tw
 ```
 
-![HugoSampleSite 中文](hugo-sample-site-zh-tw.png)
+![HugoSampleSite 中文](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial2/hugo-sample-site-zh-tw.png)
 
 ### Hugo 內建語系設定
 
@@ -243,7 +243,7 @@ params:
 
 這個設定關係到 po 文，featuredImage 就是 po 文上面的縮圖
 
-![Feature Image](featured-image.png)
+![Feature Image](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial2/featured-image.png)
 
 而 featuredImageField 就是 po 文上面的圖片，設定的欄位要叫什麼，預的名稱是 image
 
@@ -266,7 +266,7 @@ img: imgSrc
 
 就是網頁標籤左邊的縮圖，可以不設定
 
-![favicon](favicon.png)
+![favicon](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial2/favicon.png)
 
 ### Site-wide 總結
 
@@ -376,7 +376,7 @@ params:
 
 設定完成後，編譯並執行網站
 
-![HugoSampleSite subtitle](hugo-sample-site-subtitle.png)
+![HugoSampleSite subtitle](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial2/hugo-sample-site-subtitle.png)
 
 ### avatar
 
@@ -420,7 +420,7 @@ params:
 
 設定完成後，可以在 hugo server 中看執行的結果
 
-![HugoSampleSite avatar](hugo-sample-site-avatar.png)
+![HugoSampleSite avatar](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial2/hugo-sample-site-avatar.png)
 
 ### sidebar 總結
 
@@ -481,7 +481,7 @@ params:
 
 我不打算改動它，直接用預設的就好，不過還是介紹一下。至於為什麼會在這麼上的位置，是因為目前還沒有任何的 po 文，而主題 footer 的設定應該不是固定在底部的，所以才會往跑。
 
-![HugoSampleSite footer](hugo-sample-site-footer.png)
+![HugoSampleSite footer](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial2/hugo-sample-site-footer.png)
 
 ### since
 
@@ -503,7 +503,7 @@ params:
     customText: Footer 的文字測試
 ```
 
-![HugoSampleSite Footer customText](hugo-sample-site-footer-customtext.png)
+![HugoSampleSite Footer customText](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial2/hugo-sample-site-footer-customtext.png)
 
 ### Footer 總結
 
@@ -545,7 +545,7 @@ params:
 
 以本篇為例
 
-![HugoSampleSite toc](hugo-sample-site-toc.png)
+![HugoSampleSite toc](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial2/hugo-sample-site-toc.png)
 
 ### readingTime
 
@@ -684,7 +684,7 @@ params:
 
 元件結果如下圖，接下來會依依說明如何開啟四大元件：搜尋、歴史記錄、分類、標籤。
 
-![Widgets](widgets.png)
+![Widgets](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial2/widgets.png)
 
 ### page
 
@@ -733,7 +733,7 @@ layout: search
 
 執行網站
 
-![HugoSampleSite search widget](hugo-sample-site-search-widget.png)
+![HugoSampleSite search widget](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial2/hugo-sample-site-search-widget.png)
 
 #### archives
 
@@ -768,7 +768,7 @@ layout: archives
 
 執行網站
 
-![HugoSampleSite archives widget](hugo-sample-site-archives-widget.png)
+![HugoSampleSite archives widget](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial2/hugo-sample-site-archives-widget.png)
 
 #### categories and tag-cloud
 
@@ -797,7 +797,7 @@ params:
 
 執行程式，就會看到標籤元件跟分類元件了，不過因為目前沒有任何 po 文，所以不會有任何的標籤及分類顯示，上一篇會說明如何 po 文。
 
-![HugoSampleSite categories and tag-cloud](hugo-sample-site-categories-and-tag-cloud.png)
+![HugoSampleSite categories and tag-cloud](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial2/hugo-sample-site-categories-and-tag-cloud.png)
 
 ### Widgets 總結
 
@@ -899,7 +899,7 @@ params:
     toggle: false
 ```
 
-![HugoSampleSite toggle](hugo-sample-site-toggle.png)
+![HugoSampleSite toggle](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial2/hugo-sample-site-toggle.png)
 
 ### default
 
@@ -931,7 +931,7 @@ params:
 
 左邊選單設定，也是最後一個要說明的設定。參考 **_[Custom menu](https://stack.jimmycai.com/config/menu)_**
 
-![Menu](menu.png)
+![Menu](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial2/menu.png)
 
 依官方的說明，如果你的選單連結要連到一個頁面的話，可以在頁面的最上方做選單的設定，在 hugo 中最上方的區塊叫 front matter，是頁面或文章的基礎設定，下一篇說明 po 文，會有更詳細的介紹，這裡可以先跟著做就好。
 
@@ -964,7 +964,7 @@ menu:
 
 儲存後執行，就可看到首頁的選項出現了
 
-![HugoSampleSite menu index](hugo-sample-site-menu-index.png)
+![HugoSampleSite menu index](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial2/hugo-sample-site-menu-index.png)
 
 ### 關於
 
@@ -989,7 +989,7 @@ menu:
 
 儲存後執行網站，可以看到關於的連結也出現了
 
-![HugoSampleSite menu about](hugo-sample-site-menu-about.png)
+![HugoSampleSite menu about](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial2/hugo-sample-site-menu-about.png)
 
 結束執行後上版
 
@@ -1004,7 +1004,7 @@ menu:
 3. 找到 Build and deployment
 4. source 預設是 deploy from a branch，請選擇 GitHub Actions
 
-![GitHub Actions](github-actions.png)
+![GitHub Actions](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial2/github-actions.png)
 
 回到 Visual Studio Code，**請確定目前目錄是在網站的最上層**
 
@@ -1119,16 +1119,16 @@ git push
 
 接著回到 GitHub Repository，就會發現開始佈署了
 
-![GitHub Actions deploy](github-actions-deploy.png)
+![GitHub Actions deploy](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial2/github-actions-deploy.png)
 
 佈署完成
 
-![GitHub Actions deploy finished](github-actions-deploy-finished.png)
+![GitHub Actions deploy finished](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial2/github-actions-deploy-finished.png)
 
 最後回到 **_[佈署](#佈署)_** 一開始設定 GitHub Actions 的地方，會發現多出一個區塊，也就是你線上的網址，點 「Visit site」就可以確認是否有佈署成功了。
 
-![Visit Site](hugo-sample-site-visit-site.png)
+![Visit Site](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial2/hugo-sample-site-visit-site.png)
 
-![HugoSampleSite](final.png)
+![HugoSampleSite](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/hugo-new-site-tutorial2/final.png)
 
 下一篇會說明如何撰寫 po 文，希望各位都有順利設定並佈署完成
