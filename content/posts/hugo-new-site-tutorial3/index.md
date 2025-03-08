@@ -4,6 +4,18 @@ draft: false
 title: Hugo 架站教學 - PO 文撰寫
 description: 輕鬆創建你的部落格內容
 lastmod: 2025-03-07T16:14:57
+sitemap:
+  - changeFreq: monthly
+author: Sebastian Wei
+keywords:
+  - Hugo
+  - Hugo 教學
+  - Hugo Front Matter
+  - Hugo Page bundle
+  - Markdown 語法
+  - Hugo post
+  - Hugo PO 文
+  - Hugo 部落格貼文
 categories:
   - WebSite
 tags:

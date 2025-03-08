@@ -4,6 +4,15 @@ draft: false
 title: "Hugo 架站教學 - 建立網站"
 description: 使用 Hugo 架設自己的部落格
 lastmod: "2025-03-04T10:32:28"
+sitemap:
+  - changeFreq: monthly
+author: Sebastian Wei
+keywords:
+  - Hugo
+  - Hugo 教學
+  - 靜態網站架設
+  - 部落格架設
+  - Hugo 入門
 categories:
   - WebSite
 tags:

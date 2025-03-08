@@ -4,6 +4,19 @@ draft: false
 title: "Hugo 架站教學 - 主題設定"
 description: Hugo 主題設置 - 個人化自己的網站
 lastmod: "2025-03-04T18:05:29+0800"
+sitemap:
+  - changeFreq: monthly
+author: Sebastian Wei
+keywords:
+  - Hugo
+  - Hugo 教學
+  - Hugo 主題
+  - 靜態網站佈署
+  - Hugo 靜態網站佈署
+  - Hugo website deploy on GitHub Pages
+  - Hugo Theme Stack
+  - Hugo Theme
+  - GitHub Pages
 categories:
   - WebSite
 tags:
