@@ -27,7 +27,7 @@ timeZone: Asia/Taipei
 services:
   # GA Tracking ID
   googleAnalytics:
-    id:
+    id: G-YY8HV9JHQD
 
 enableRobotsTXT: true
 
