@@ -29,6 +29,8 @@ services:
   googleAnalytics:
     id:
 
+enableRobotsTXT: true
+
 permalinks:
   page: /:slug/
   posts: /posts/:slug/
