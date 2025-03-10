@@ -46,7 +46,7 @@ pagination:
 # See https://stack.jimmycai.com/config/site
 params:
   # Site favicon path.
-  favicon:
+  favicon: /weisfavicon.ico
   # Pages places under sections will be shown on homepage and archive page.
   mainSections: posts
   # Front Matter field used to get the featured image of a page.
