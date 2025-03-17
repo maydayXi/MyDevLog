@@ -12,6 +12,8 @@ tags:
   - JWT
   - JSON Web Token
   - Authentication
+  - Entity Framework Core
+  - EF Core
 image: jwt-tutorial-featured.jpg
 links:
   - title: JWT Authentication with .NET 9
@@ -27,6 +29,7 @@ links:
 # 本篇重點
 
 - **JWT（JSON Web Token）**
+- **Entity Framework Core**
 - **登入/登出/註冊**
 - **API（Application Programming Interface）**
 
@@ -223,9 +226,13 @@ dotnet add package Microsoft.EntityFrameworkCore.Design --version 9.0.3
 
 ## 建立資料模型
 
+以 ORM 的概念來說，可以把**一個 Entity 想像成一張資料表**
+
 在專案目錄下新增一個 `Entities` 的目錄，參考下圖，在「class/interface」選項下有一個「**Directory**」的選項，點擊後輸入目錄名稱 `Entities`，這個目錄將**存放所有與資料庫互動的資料模型檔**
 
 ### Employee
+
+以**註冊、登入、登出**這三個功能來說，一張員工的資料表已經夠了
 
 並 `Entities` 目錄下新增 `Employee.cs` 檔案，作為**員工資料模型**，如下圖
 
@@ -283,3 +290,103 @@ public class Employee
 1. Email：員工的信箱，一般來而會使用員工的英文名字 + 公司內部的 mail server，因此已包含了姓名相關的資訊，所以為了教學我簡化了姓名「**Name**」欄位
 2. **CreateOn, ModifyOn**：公司內部有時候會有某筆資料出問題的，經由某位員工或使用者反應，如**登入失敗**，**為了要追查使用軌跡，會加入相關的時間欄位**
 3. **Password**：密碼應該要加密後再存入資料庫，所以這個欄位會存放加密後的值。
+
+## 建立 DBContext
+
+在建立資料模型有提到，在 ORM 中一個 Entity 是資料表的概念，**那 DBContext 就是一個資料庫的概念**，所以要建立一個專屬資料庫的類別作為資料庫的 Mapping，**這個類別需要繼承「DBContext」**
+
+下面在 `Entities` 中建立一個 `AppDbContext.cs` 的類別
+
+```csharp
+using Microsoft.EntityFrameworkCore;
+
+namespace JWT_Authentication_API.Entities;
+
+/// <summary>
+/// Database Context
+/// </summary>
+/// <param name="options"> 資料庫連線相關設定，以 DI 形式 </param>
+public class AppDbContext(DbContextOptions<AppDbContext> options)
+    : DbContext(options)
+{
+    /// <summary>
+    /// 員工資料表
+    /// </summary>
+    public DbSet<Employee> Employees { get; set; }
+}
+```
+
+## 建立實體資料庫
+
+資料模型及 DBContext 都建立好了之後，就可以建立實體資料庫了，在根目錄下開啟 `appsettings.json` 並**新增 ConnectionString（資料庫的連線字串）**如下
+
+由於連線字串涉及我的資料庫帳號密碼，這邊需要改成自己的資料庫連線字串，參數說明如下
+
+- **Server：資料庫伺服器的 IP**，如果像我一樣架在雲端，就會是雲端主機的對外 IP，**「,」後面接資料庫的 port，通常都是 1433**。
+- **Database：資料庫的名稱**，也就是要連線到的目標資料庫
+- **user：資料庫使用者的帳號**，如果有建立「**sa**」的話就可以寫 sa\
+   sa(System Admin)，是微軟 SQL Server 預設的最高權限帳號，通常安裝資料庫的時候會一起設定。
+- **password：使用者密碼**
+- **TrustServerCertificate：是否信任伺服器的 SSL 憑證**，如果 True 就不會檢查 Server 的憑證，可以自己決定
+
+```json
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "ConnectionString": {
+    "AppDb": "Server=YourServerIP,1433;Database=YourDatabaseName;user=username;password=YourDatabasePassword;TrustServerCertificate=True;"
+  }
+}
+```
+
+### 注入資料庫服務
+
+開啟根目錄 `Program.cs`，注入資料庫服務
+
+```csharp
+// Add SQL Server Database Service
+// builder.Configuration 會參考到 `appsettings.json`
+// GetConnectionString 方法會抓到資料庫連線字串，參數傳入上面設定的連線字串名字
+builder.Services.AddDbContext<AppDbContext>(optionsBuilder =>
+{
+    optionsBuilder.UseSqlServer(builder.Configuration.GetConnectionString("AppDb"));
+});
+```
+
+### 新增 Migration
+
+接著在專案右鍵 → Entity Framework Core → Add Migration
+
+![Add Migration](add-migration.png)
+
+按下「OK」
+
+![Initial Migration](initial-migration.png)
+
+會在下方看到 EF Core 建立 Migration 的結果，如果沒有錯誤訊息（如下），就是成功了
+
+![Migration Finished.](migration-finish.png)
+
+成功後會看到專案下出現了 **Migration 的目錄**，並且出現兩個檔案，是**紀錄資料模型的變更**，每更新一次模型，就會再多出兩個檔，其中一個檔案會以「**timestamp_MigrationName**」命名
+
+![Migration Folder](migration-folder.png)
+
+### 更新資料庫
+
+接下來要將變更的模型，對映到資料庫，以產生實際的資料表\
+在專案右鍵 → Entity Framework Core → Update Database
+
+![Initial Update Database](init-update-database.png)
+
+出現更新對話框，**Target migration，要設成上面產生的 migration 檔**，確認後按下 OK
+
+![Initial Update Database](init-update-database-1.png)
+
+會在下方 EF Core 的視窗中看到執行**更新資料庫的過程及執行的 SQL 語法**
+
+![Update Database Done](update-database-done.png)
