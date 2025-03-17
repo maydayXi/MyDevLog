@@ -14,6 +14,7 @@ tags:
   - Authentication
   - Entity Framework Core
   - EF Core
+  - Rider
 image: jwt-tutorial-featured.jpg
 links:
   - title: JWT Authentication with .NET 9
@@ -28,6 +29,7 @@ links:
 
 # 本篇重點
 
+- **Rider**
 - **JWT（JSON Web Token）**
 - **Entity Framework Core**
 - **登入/登出/註冊**
@@ -387,6 +389,24 @@ builder.Services.AddDbContext<AppDbContext>(optionsBuilder =>
 
 ![Initial Update Database](init-update-database-1.png)
 
-會在下方 EF Core 的視窗中看到執行**更新資料庫的過程及執行的 SQL 語法**
+會在下方 EF Core 的視窗中看到執行**更新資料庫的過程及執行的 SQL 語法**，如果沒有看到錯誤訊息，就是成功了
 
 ![Update Database Done](update-database-done.png)
+
+### 驗證資料庫
+
+Rider 提供了一個資料庫的圖型介面，讓我們可以確認資料庫的內容，在最右邊會看到一個**資料庫的 icon，點擊後有一個「+」，選擇 Connect to Database**
+
+![Rider connect to database](rider-connet2database.png)
+
+出現對話框後，選擇「**use connection string**」，將 **_[建立實體資料庫](#建立實體資料庫)_** 中的連線字串值（AppDB 不用）複製並貼上
+
+![Rider connect to database configuration](rider-connect-to-database-fonfiguration.png)
+
+貼上後等它跑一下，會出現 **Test Connection，可以測試連線字串正確性**，但一般來說，在貼上的時候，Rider 就會自動幫你測試了，確認無誤後可以按下「Connect to Database」連線到資料庫
+
+![Rider connect to database test](rider-connect-to-databaase-test.png)
+
+就可以順利看到資料庫了
+
+![Database finished](database-finished.png)
