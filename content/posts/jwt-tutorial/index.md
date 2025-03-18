@@ -15,12 +15,18 @@ tags:
   - Entity Framework Core
   - EF Core
   - Rider
+  - Postman
+  - Web API
 image: jwt-tutorial-featured.jpg
 links:
   - title: JWT Authentication with .NET 9
     description: Youtube 教學影片
     website: https://www.youtube.com/watch?v=6EEltKS8AwA
     image: yt-icon.png
+  - title: JWT-Authentication-API
+    description: 本專案原始碼
+    website: https://github.com/maydayXi/JWT-Authentication-API
+    image: https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png
 ---
 
 # 為什麼會寫這一篇
@@ -33,7 +39,7 @@ links:
 - **JWT（JSON Web Token）**
 - **Entity Framework Core**
 - **登入/登出/註冊**
-- **API（Application Programming Interface）**
+- **Web API（Application Programming Interface）**
 
 # 閱讀說明書
 
@@ -410,3 +416,169 @@ Rider 提供了一個資料庫的圖型介面，讓我們可以確認資料庫�
 就可以順利看到資料庫了
 
 ![Database finished](database-finished.png)
+
+## 實作功能
+
+資料庫建立完成後，就可以開始實作「註冊」、「登入」、「登出」功能了
+
+### 新增驗證功能控制器
+
+首先新增一個 `Controllers` 目錄，在目錄中再新增 `AuthController.cs`
+
+![Add AuthController](add-auth-controller.png)
+
+![Add AuthController dialog](add-auth-controller-dialog.png)
+
+新增完成後，將下 `AuthController.cs` 預設的方法刪掉，並宣告成 ApiController 如下
+
+```csharp
+using Microsoft.AspNetCore.Mvc;
+
+namespace JWT_Authentication_API.Controllers;
+/// <summary>
+/// 將 AuthController 宣告成為 ApiController
+/// 並定義路由規則（網址）=> domain/api/auth
+/// </summary>
+[ApiController, Route("api/[controller]")]
+public class AuthController : Controller
+{
+
+}
+```
+
+- **ApiController：將目標控制器宣告成 API 控制器**
+- **Route：定義路由規則**，[controller] 會變成目標控制器的名字，最後與 domain 組合成 API 網址
+
+### 註冊
+
+在 `AuthController.cs` 中新增註冊方法 **register，並且使用 HttpPost 方式呼叫，其中參數 "register" 是路由的一部分，會加在網址的最後**，有寫過 ASP.NET NVC 的話，很像傳統 MVC 的路由機制 **Controller/Action**，所以這個 **[HttpPost("register")]** 最後會變成 `domain/api/auth/register` 這個網址
+
+```csharp
+[HttpPost("register")]
+public ActionResult Register()
+{
+
+}
+```
+
+#### RegisterDto
+
+接著需要一個 model 來負責接收註冊資料，在根目錄下新增 `Models` 目錄，在目錄下新增 `RegisterDto.cs`
+
+如果有寫過 ASP.NET MVC 的話，也可以把它想像成是 `ViewModels`，不過因為 Api 沒有 View 的部分，我怕混淆所以改放在 `Models`
+
+```csharp
+namespace JWT_Authentication_API.Models;
+
+/// <summary>
+/// 註冊使用的資料模型
+/// </summary>
+public class RegisterDto
+{
+    /// <summary>
+    /// 使用者帳號
+    /// </summary>
+    public string Email { get; set; } = string.Empty;
+    /// <summary>
+    /// 使用者密碼（未加密）
+    /// </summary>
+    public string Password { get; set; } = string.Empty;
+}
+```
+
+#### HttpPostRegister
+
+回到 `AuthController.cs` 補上註冊方法的程式碼如下，說明如註解
+
+```csharp
+/// <summary>
+/// 註冊 API
+/// </summary>
+/// <param name="registerDto"> 使用者傳送的員工註冊資料 </param>
+/// <returns> 註冊完成的員工資料 </returns>
+[HttpPost("register")]
+public ActionResult Register(RegisterDto registerDto)
+{
+    // 驗證註冊資料
+    if (string.IsNullOrEmpty(registerDto.Email)
+        || string.IsNullOrEmpty(registerDto.Password))
+        return BadRequest("Please provide 'Email' and 'Password'");
+
+    // 建立員工資料
+    Employee employee = new() { Email = registerDto.Email };
+    // 將密碼加密
+    employee.PasswordHash = new PasswordHasher<Employee>()
+        .HashPassword(employee, registerDto.Password);
+
+    // 回傳建立完成的員工資料
+    return Ok(employee);
+}
+```
+
+#### 安裝 scalar
+
+在 NuGet 中搜尋「**scalar**」找到「**_[Scalar.AspNetCore](https://www.nuget.org/packages/Scalar.AspNetCore/)_**」並安裝
+
+![NuGet scalar](nuget-scalar.png)
+
+在 `Program.cs` 進行 scalar 的服務注入，影片中使用的版本是 `.NET 9` 的版本配置方式，我的環境是 `.NET 8` 的版本，所以略有不同\
+可以參考 **_[Scalar 基本設定](https://github.com/scalar/scalar/blob/main/documentation/integrations/dotnet.md#basic-setup)_** 及 **_[.NET 8 的 Scalar 設定方式](https://github.com/scalar/scalar/blob/main/documentation/integrations/dotnet.md#openapi-document-route)_**
+
+開啟 `Program.cs`，改寫如下，其中 if 區塊是原本就有的，只需要更改區塊內的內容
+
+```csharp
+// Add services to the container.
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// 補上服務對控制器的注入
+builder.Services.AddControllers();
+
+#region Swagger Service
+// Add Swagger service
+builder.Services
+    .AddEndpointsApiExplorer()
+    .AddSwaggerGen();
+#endregion
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    // See https://github.com/scalar/scalar/blob/main/integrations/aspnetcore/README.md#usage
+    app.UseSwagger(options =>
+        options.RouteTemplate = "swagger/{documentName}/swagger.json"
+    );
+    // 因為要使用 scalar 的 UI，所以這邊將 Swagger UI 關閉
+    // app.UseSwaggerUI();
+
+    // See https://github.com/scalar/scalar/blob/main/documentation/integrations/dotnet.md#openapi-document-route
+    app.MapScalarApiReference(options =>
+        options.WithOpenApiRoutePattern("swagger/{documentName}/swagger.json"));
+}
+
+// 啟用控制器的 Route
+app.MapControllers();
+```
+
+### 測試註冊
+
+參考 **_[建立專案](#建立專案)_** 的執行方式執行網站，將網址改成 `http://localhost:7274/scalar/v1`，你的 port 可能跟我的不一樣
+
+![Scalar UI](scalar-ui.png)
+
+有兩種測試方式
+
+1. 執行後直接測試
+2. 執行後使用 **_[Postman](https://www.postman.com/)_** 測試
+
+#### 執行後測試
+
+這裡先採用執行後測試的方法，在上面執行的網頁畫面，點 `Auth` 下面的 Api 網址，再按下「**Test Request**」
+
+![Scalar Test Request](scalar-test-request.png)
+
+接著輸入要註冊的帳號密碼如下圖，只要有**看到 200 及使用者註冊資料回傳就算成功了**
+
+![Auth register test](auth-register-test.png)
+
+當然也可以測試，沒有帳號或沒有密碼的情況，看看驗證訊息是否正確，參考 **_[Register 方法](#httppostregister)_ 的第 10 ~ 12 行**，有得到預期的驗證訊息就算成功了
+
+![Register no password provide](auth-register-no-password-test.png)
