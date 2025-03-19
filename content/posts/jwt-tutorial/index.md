@@ -417,11 +417,9 @@ Rider 提供了一個資料庫的圖型介面，讓我們可以確認資料庫�
 
 ![Database finished](database-finished.png)
 
-## 實作功能
-
 資料庫建立完成後，就可以開始實作「註冊」、「登入」、「登出」功能了
 
-### 新增驗證功能控制器
+## AuthController
 
 首先新增一個 `Controllers` 目錄，在目錄中再新增 `AuthController.cs`
 
@@ -449,7 +447,7 @@ public class AuthController : Controller
 - **ApiController：將目標控制器宣告成 API 控制器**
 - **Route：定義路由規則**，[controller] 會變成目標控制器的名字，最後與 domain 組合成 API 網址
 
-### 註冊
+## 註冊
 
 在 `AuthController.cs` 中新增註冊方法 **register，並且使用 HttpPost 方式呼叫，其中參數 "register" 是路由的一部分，會加在網址的最後**，有寫過 ASP.NET NVC 的話，很像傳統 MVC 的路由機制 **Controller/Action**，所以這個 **[HttpPost("register")]** 最後會變成 `domain/api/auth/register` 這個網址
 
@@ -461,7 +459,7 @@ public ActionResult Register()
 }
 ```
 
-#### RegisterDto
+### RegisterDto
 
 接著需要一個 model 來負責接收註冊資料，在根目錄下新增 `Models` 目錄，在目錄下新增 `RegisterDto.cs`
 
@@ -486,7 +484,7 @@ public class RegisterDto
 }
 ```
 
-#### HttpPostRegister
+### HttpPostRegister
 
 回到 `AuthController.cs` 補上註冊方法的程式碼如下，說明如註解
 
@@ -514,6 +512,8 @@ public ActionResult Register(RegisterDto registerDto)
     return Ok(employee);
 }
 ```
+
+### 測試註冊
 
 #### 安裝 scalar
 
@@ -558,8 +558,6 @@ if (app.Environment.IsDevelopment())
 app.MapControllers();
 ```
 
-### 測試註冊
-
 參考 **_[建立專案](#建立專案)_** 的執行方式執行網站，將網址改成 `http://localhost:7274/scalar/v1`，你的 port 可能跟我的不一樣
 
 ![Scalar UI](scalar-ui.png)
@@ -582,3 +580,498 @@ app.MapControllers();
 當然也可以測試，沒有帳號或沒有密碼的情況，看看驗證訊息是否正確，參考 **_[Register 方法](#httppostregister)_ 的第 10 ~ 12 行**，有得到預期的驗證訊息就算成功了
 
 ![Register no password provide](auth-register-no-password-test.png)
+
+## 登入
+
+登入功能會涉及到資料庫，因為**需要將員工的註冊資料儲存到資料庫，並在登入時進行驗證**，所以會複雜一些
+
+### LoginDto
+
+跟註冊一樣，需要一個 Model 來紀錄傳送的登入資訊，所以在 `Model` 目錄下新增 `LoginDto.cs`\
+由於教學的場景**假設「註冊」與「登入」都只有傳送「帳號/密碼」**，所以可以偷懶一點直接繼承 `RegisterDto.cs`，但其他真實的場景可能會有一些差異，因些不建議直接繼承，且基於可讀性原則，我還是建一個 `LoginDto`
+
+```csharp
+namespace JWT_Authentication_API.Models;
+
+/// <summary>
+/// 使用者登入的資料模型
+/// </summary>
+public class LoginDto
+{
+    /// <summary>
+    /// 使用者帳號
+    /// </summary>
+    public string Email { get; set; } = string.Empty;
+    /// <summary>
+    /// 使用者密碼（未加密）
+    /// </summary>
+    public string Password { get; set; } = string.Empty;
+}
+```
+
+偷懶的作法
+
+```csharp
+namespace JWT_Authentication_API.Models;
+
+public class LoginDto: RegisterDto
+{
+
+}
+```
+
+### 分層架構
+
+接下來要將 `Register` 方法做一些修改，將使用者註冊資料存到資料庫中，好讓之後的「**登入**」方法可以使用，並採用**分層架構**，讓程式碼可讀性更高
+
+首先將建立員工資料的部分抽出來，不直接將資料存取功能放在 Controller，在專案下建立 `Services` 及 `Interfaces` 兩個目錄
+
+1. **Services：用來放存取資料的相關服務**
+2. **Interfaces：服務的介面，供服務實作**
+
+**當然分層架構還可以再抽出一層 `Repository` 不過這篇為教學簡化，所以只先抽 `Service`**
+
+### IEmployeeService
+
+在 `Interfaces` 目錄下新增 `IEmployeeService.cs`，新增**員工服務介面，用來定義員工資料的存取功能，註冊就是新增一筆員工資料**，所以在介面加入**方法定義**如下
+
+1. **新增員工**
+2. **取得員工資料：用來檢查是否有重複註冊**
+
+```csharp
+using JWT_Authentication_API.Models;
+
+namespace JWT_Authentication_API.Interfaces;
+
+/// <summary>
+/// 員工資料存取介面
+/// </summary>
+public interface IEmployeeService
+{
+    /// <summary>
+    /// 新增員工資料
+    /// </summary>
+    /// <param name="registerDto"> 員工註冊資料 </param>
+    /// <returns> 註冊結果 </returns>
+    Task<bool> AddEmployeeAsync(RegisterDto registerDto);
+
+    /// <summary>
+    /// 依帳號取得員工資料
+    /// </summary>
+    /// <param name="email"> 員工帳號 </param>
+    /// <returns> 員工資料，如果找不到就 null </returns>
+    Task<RegisterDto?> GetEmployeeByEmailAsync(string email);
+}
+```
+
+### EmployeeService
+
+在 `Services` 目錄新增一個 `EmployeeService.cs` 並實作 `IEmployeeService.cs` 介面定義的方法如下
+
+```csharp
+using System.ComponentModel.DataAnnotations;
+using JWT_Authentication_API.Entities;
+using JWT_Authentication_API.Interfaces;
+using JWT_Authentication_API.Models;
+using Microsoft.AspNetCore.Identity;
+
+namespace JWT_Authentication_API.Services;
+
+/// <summary>
+/// 員工資料存取服務
+/// </summary>
+public class EmployeeService(AppDbContext dbContext) : IEmployeeService
+{
+    private readonly AppDbContext _appDb = dbContext;
+
+    /// <summary>
+    /// 新增員工資料
+    /// </summary>
+    /// <param name="registerDto"> 員工註冊資料 </param>
+    /// <returns> 註冊結果 </returns>
+    public async Task<bool> AddEmployeeAsync(RegisterDto registerDto)
+    {
+        // 這裡也可以不用檢查，`Controller` 檢查過一次了
+        // 但基於安全性，我再檢查一次
+        if (string.IsNullOrEmpty(registerDto.Email)
+            || string.IsNullOrEmpty(registerDto.Password))
+            throw new ValidationException("Email or password is required");
+
+        // Create new employee data.
+        Employee employee = new() { Email = registerDto.Email };
+        // Hash password
+        employee.PasswordHash = new PasswordHasher<Employee>()
+            .HashPassword(employee, registerDto.Password);
+        // Insert into database
+        await _appDb.Employees.AddAsync(employee);
+        // Save changes
+        var result = await _appDb.SaveChangesAsync();
+
+        return result > 0;
+    }
+
+    /// <summary>
+    /// 依帳號取得員工資料
+    /// </summary>
+    /// <param name="email"> 註冊信箱/登入信箱 </param>
+    /// <returns> 員工資料 或 null </returns>
+    public async Task<RegisterDto?> GetEmployeeByEmailAsync(string email)
+    {
+        var employee = await _appDb.Employees
+            .FirstOrDefaultAsync(e => e.Email == email);
+
+        return employee == null
+            ? null
+            : new RegisterDto
+            {
+                Email = employee.Email,
+                Password = employee.PasswordHash
+            };
+    }
+}
+```
+
+### 修改註冊方法
+
+回到 `AuthController` 的 `Register` 方法並**加入員工服務物件的注入**，修改如下
+
+```csharp
+using JWT_Authentication_API.Interfaces;
+using JWT_Authentication_API.Models;
+using Microsoft.AspNetCore.Mvc;
+
+namespace JWT_Authentication_API.Controllers;
+
+/// <summary>
+/// 將 AuthController 宣告成為 ApiController
+/// 並定義路由規則（網址）=> domain/api/auth
+/// </summary>
+/// <param name="employeeService"> 員工資料存取服務 </param>
+[ApiController, Route("api/[controller]")]
+public class AuthController(IEmployeeService employeeService) : Controller
+{
+    /// <summary>
+    /// 員工資料存取的服務
+    /// </summary>
+    private readonly IEmployeeService _employeeService = employeeService;
+
+    /// <summary>
+    /// 註冊 API
+    /// </summary>
+    /// <param name="registerDto"> 使用者傳送的員工註冊資料 </param>
+    /// <returns> 註冊完成的員工資料 </returns>
+    [HttpPost("register")]
+    public async Task<ActionResult> RegisterAsync(RegisterDto registerDto)
+    {
+        // 驗證註冊資料
+        if (string.IsNullOrEmpty(registerDto.Email)
+            || string.IsNullOrEmpty(registerDto.Password))
+            return BadRequest("Please provide 'Email' and 'Password'");
+
+        // 先查詢有沒有重複的員工資料
+        var employee = await _employeeService.GetEmployeeByEmailAsync(registerDto.Email);
+
+        // 如果沒有就透過服務註冊員工資料
+        var registerResult =
+            employee == null &&
+            await _employeeService.AddEmployeeAsync(registerDto);
+
+        // 回傳註冊結果
+        return registerResult
+            ? Ok("Register successfully!")
+            : employee != null
+                ? BadRequest("User already exists!")
+                : BadRequest("Failed to register user");
+    }
+}
+```
+
+### Employee DI
+
+因為 `AuthController` 使用了 `EmployeeService` 依賴注入，所以需要去 `Program.cs` 註冊 `EmployeeService` 的服務，讓 `AuthController` 可以透過建構函式注入服務
+
+特別注意**一定要新增在 `builder.Build()` 的上面任一地方，因為 呼叫 Build 方法後，就不能在註冊服務了**
+
+```csharp
+#region CustomService
+builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+#endregion
+
+WebApplication app = builder.Build();
+```
+
+### Login
+
+正式開始實作登入，在 `AuthController.cs` 新增 `Login` 方法，**接收參數為使用者輸入的帳號密碼**\
+登入的部分可以分成兩步
+
+1. **檢查有沒有註冊這個員工**，上面在 **_[分層架構](#分層架構)_** 已經完成了，如果沒有就回傳錯誤訊息。
+2. **驗證員工帳號密碼**：如果第 1 步有找到註冊的員工資料，就要驗證輸入的帳號密碼，最後回傳驗證結果。
+
+詳細流程如下
+
+```mermaid
+        ┌─────┐
+        │Start│
+        └──┬──┘
+    _______▽________                                              _________________
+   ╱                ╲                                            ╱                 ╲    ┌─────────────────────┐
+  ╱ Missing Username ╲__________________________________________╱ Missing Username? ╲___│Username is required!│
+  ╲ or Password      ╱yes                                       ╲                   ╱yes└──────────┬──────────┘
+   ╲________________╱                                            ╲_________________╱               │
+           │no                                                            │no                      │
+  ┌────────▽───────┐                                           ┌──────────▽─────────┐              │
+  │Check Username  │                                           │Password is required│              │
+  │and PasswordHash│                                           └──────────┬─────────┘              │
+  └────────┬───────┘                                                      │                        │
+    _______▽________                                                      │                        │
+   ╱                ╲                      ┌──────────────────┐           │                        │
+  ╱ Invalid Username ╲_____________________│Username not found│           │                        │
+  ╲                  ╱yes                  └─────────┬────────┘           │                        │
+   ╲________________╱                                │                    │                        │
+           │no                                       │                    │                        │
+┌──────────▽──────────┐                              │                    │                        │
+│Validate PasswordHash│                              │                    │                        │
+└──────────┬──────────┘                              │                    │                        │
+  _________▽__________                               │                    │                        │
+ ╱                    ╲    ┌──────────────┐          │                    │                        │
+╱ Invalid PasswordHash ╲___│Wrong Password│          │                    │                        │
+╲                      ╱yes└───────┬──────┘          │                    │                        │
+ ╲____________________╱            │                 │                    │                        │
+           │no                     │                 │                    │                        │
+ ┌─────────▽────────┐              │                 │                    │                        │
+ │Login successfully│              │                 │                    │                        │
+ └─────────┬────────┘              │                 │                    │                        │
+           └───────────────────────┴┬────────────────┴────────────────────┴────────────────────────┘
+                                  ┌─▽─┐
+                                  │End│
+                                  └───┘
+```
+
+新增一個 `[HttpPost]` 的 `LoginAsync` 方法
+
+```csharp
+/// <summary>
+/// 登入
+/// </summary>
+/// <param name="loginDto"> 使用者的輸入資料 </param>
+/// <returns> 登入結果 </returns>
+[HttpPost("login")]
+public async Task<string> LoginAsync(LoginDto loginDto)
+{
+    // 登入資料驗證
+    if (string.IsNullOrEmpty(loginDto.Email) ||
+        string.IsNullOrEmpty(loginDto.Password))
+        return "Please provide 'Email' and 'Password'";
+
+    // 檢查員工帳號
+    if (await _employeeService.GetEmployeeByEmailAsync(loginDto.Email) == null)
+        return "User does not exist!";
+
+    // 檢查員工密碼並回傳登入結果
+    return result;
+}
+```
+
+#### 驗證員工密碼
+
+員工密碼的檢查屬於「驗證」的範疇，所以不能寫在 `Employee` 的相關服務及定義\
+在 `Interface` 目錄下新增 `IAuthService.cs`，在 `Services` 目錄下新增 `AuthService.cs`
+
+目錄結構如下
+
+```mermaid
+JwtAuthenticationAPI.csproj
+ ├─Services
+ │  └─AuthService.cs
+ └─Interfaces
+    └─IAuthService.cs
+```
+
+在 `IAuthService.cs` 新增驗證密碼方法定義
+
+```csharp
+using JWT_Authentication_API.Models;
+
+namespace JWT_Authentication_API.Interfaces;
+
+/// <summary>
+/// 驗證服務介面
+/// </summary>
+public interface IAuthService
+{
+    /// <summary>
+    /// 驗證員工登入
+    /// </summary>
+    /// <param name="loginDto"> 員工登入資料 </param>
+    /// <returns> 驗證結果</returns>
+    Task<bool> ValidateUserAsync(LoginDto loginDto);
+}
+```
+
+在 `AuthService.cs` 實作驗證方法
+
+```csharp
+using JWT_Authentication_API.Interfaces;
+using JWT_Authentication_API.Models;
+using Microsoft.AspNetCore.Identity;
+
+namespace JWT_Authentication_API.Services;
+
+/// <summary>
+/// 驗證服務
+/// </summary>
+public class AuthService(IEmployeeService employeeService): IAuthService
+{
+    /// <summary>
+    /// 員工資料存取服務
+    /// </summary>
+    private readonly IEmployeeService _employeeService = employeeService;
+
+    /// <summary>
+    /// 驗證員工登入密碼
+    /// </summary>
+    /// <param name="loginDto"> 員工登入資料 </param>
+    /// <returns> 驗證結果 </returns>
+    public async Task<bool> ValidateUserAsync(LoginDto loginDto)
+    {
+        if(string.IsNullOrEmpty(loginDto.Email)
+           || string.IsNullOrEmpty(loginDto.Password))
+            throw new ArgumentException($"Invalid {nameof(loginDto.Email)} or {nameof(loginDto.Password)}!");
+
+        // 取得員工資料進行驗證
+        var employee = await _employeeService.GetEmployeeByEmailAsync(loginDto.Email);
+        if (employee == null) throw new NullReferenceException("Employee not found!");
+
+        // 回傳驗證結果
+        return new PasswordHasher<RegisterDto>().VerifyHashedPassword(employee,
+                   employee.Password, loginDto.Password)
+               == PasswordVerificationResult.Success;
+    }
+}
+```
+
+最後再回到 `AuthController.cs` **注入驗證的服務物件**，並在 `LoginAsync` 方法加入驗證的程式
+
+```csharp
+using JWT_Authentication_API.Interfaces;
+using JWT_Authentication_API.Models;
+using Microsoft.AspNetCore.Mvc;
+
+namespace JWT_Authentication_API.Controllers;
+
+/// <summary>
+/// 將 AuthController 宣告成為 ApiController
+/// 並定義路由規則（網址）=> domain/api/auth
+/// </summary>
+/// <param name="employeeService"> 員工資料存取服務 </param>
+/// <param name="authService"> 登入驗證服務 </param>
+[ApiController, Route("api/[controller]")]
+public class AuthController(
+    IEmployeeService employeeService,
+    IAuthService authService) : Controller
+{
+    /// <summary>
+    /// 員工資料存取的服務
+    /// </summary>
+    private readonly IEmployeeService _employeeService = employeeService;
+    /// <summary>
+    /// 登入驗證的服務
+    /// </summary>
+    private readonly IAuthService _authService = authService;
+
+    /// <summary>
+    /// 註冊 API
+    /// </summary>
+    /// <param name="registerDto"> 使用者傳送的員工註冊資料 </param>
+    /// <returns> 註冊完成的員工資料 </returns>
+    [HttpPost("register")]
+    public async Task<ActionResult> RegisterAsync(RegisterDto registerDto)
+    {
+        // 驗證註冊資料
+        if (string.IsNullOrEmpty(registerDto.Email)
+            || string.IsNullOrEmpty(registerDto.Password))
+            return BadRequest("Please provide 'Email' and 'Password'");
+
+        // 先查詢有沒有重複的員工資料
+        var employee = await _employeeService.GetEmployeeByEmailAsync(registerDto.Email);
+
+        // 如果沒有就註冊新員工
+        var registerResult =
+            employee == null &&
+            await _employeeService.AddEmployeeAsync(registerDto);
+
+        // 回傳註冊結果
+        return registerResult
+            ? Ok("Register successfully!")
+            : employee != null
+                ? BadRequest("User already exists!")
+                : BadRequest("Failed to register user");
+    }
+
+    /// <summary>
+    /// 登入
+    /// </summary>
+    /// <param name="loginDto"> 使用者的輸入資料 </param>
+    /// <returns> 登入結果 </returns>
+    [HttpPost("login")]
+    public async Task<string> LoginAsync(LoginDto loginDto)
+    {
+        // 登入資料驗證
+        if (string.IsNullOrEmpty(loginDto.Email) ||
+            string.IsNullOrEmpty(loginDto.Password))
+            return "Please provide 'Email' and 'Password'";
+
+        // 檢查員工帳號
+        if (await _employeeService.GetEmployeeByEmailAsync(loginDto.Email) == null)
+            return "User does not exist!";
+
+        // 檢查員工密碼並回傳登入結果
+        return await _authService.ValidateUserAsync(loginDto)
+            ? "jwt-token"
+            : "Login failed";
+    }
+}
+```
+
+基本上，就完成了，下面 JWT 實作的時候會再改成所產生的 JWT，最後**因為有注入 `IAuthService` 驗證相關的服務，所以要去 `Program.cs` 註冊**如下
+
+```csharp
+#region CustomService
+builder.Services
+    .AddScoped<IEmployeeService, EmployeeService>()
+    .AddScoped<IAuthService, AuthService>();
+#endregion
+```
+
+### 測試 Login
+
+這邊示範用 Postman 進行測試，請先執行專案，確認執行成功後**開啟 Postman，並按下「+」新增一個 Request 分頁**
+
+![Open Postman](open-postman.png)
+
+將 Request 改成 「**POST**」，並輸入 API 網址，可以參考 **_[測試註冊](#測試註冊)_** 章節最後一張圖的網址
+
+下方選擇「**Body**」，在 Body 下方圈選「**raw**」，row 旁邊下拉改成「**JSON**」
+並輸入要註冊的帳號密碼如下，完成後按下「**Send**」，結果就會出現在下方，如下圖
+
+```json
+{
+  "email": "",
+  "password": ""
+}
+```
+
+要測試登入，所以一定要先註冊一個使用者，也順便用 Postman 測試註冊功能
+
+![Empty Test](postman-empty-test.png)
+
+![No Password Test](postman-no-password-test.png)
+
+![Register Test](postman-register-test.png)
+
+將網址改成登入的 API 網址，測試登入
+
+![Login Success](postman-login-success.png)
+
+![Login Failed Test](postman-login-failed-test.png)
