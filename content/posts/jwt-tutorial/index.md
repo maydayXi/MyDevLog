@@ -3,7 +3,7 @@ date: "2025-03-15T16:43:21+08:00"
 draft: false
 title: ASP.NET Core 實作 JWT 認證
 description: 使用 JSON Web Token 實現安全的認證機制
-lastmod: 2025-03-23T01:19:35
+lastmod: 2025-03-23T01:42:10
 categories:
   - WebSite
 tags:
@@ -1654,4 +1654,4 @@ public class AuthController(
 
 ![Logout Successfully](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/logout-success.png)
 
-到這邊，註冊、登入、登出就完成了，下篇下會介紹及實作 Refresh Token！
+到這邊，註冊、登入、登出就完成了，下篇下會介紹及實作 Refresh Token，並將專案加入角色驗證，讓專案更完整。
