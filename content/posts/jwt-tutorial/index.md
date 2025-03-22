@@ -3,6 +3,7 @@ date: "2025-03-15T16:43:21+08:00"
 draft: false
 title: ASP.NET Core 實作 JWT 認證
 description: 使用 JSON Web Token 實現安全的認證機制
+lastmod: 2025-03-21T01:56:49
 categories:
   - WebSite
 tags:
@@ -1075,3 +1076,368 @@ builder.Services
 ![Login Success](postman-login-success.png)
 
 ![Login Failed Test](postman-login-failed-test.png)
+
+## JWT
+
+接下來要實作產生 JWT 的方法，並將上一節 `LoginAsync` 方法回傳值改成所產生的 JWT
+
+下圖簡單的說明 JWT 的驗證流程\
+1, 2, 3 上一節已經實作了，不再說明\
+
+4. 如果登入登入成功，就合回傳一個合法的 JWT
+5. 使用者需要存取授權的資源時，會將 JWT 傳送至 Server 進行驗證
+6. 如果驗證通過，就會回傳授權的資源；\
+   如果未通過有兩種情況
+   - **正確的 Token，但權限不夠**，如：業務部門無法存取會計部門的帳務資料\
+     會回傳 **_[Http 403](https://developer.mozilla.org/zh-TW/docs/Web/HTTP/Reference/Status/403)_**
+   - **錯誤的 Token**，如 Token 過期或遭竄改，會回傳 **_[Http 401](https://developer.mozilla.org/zh-TW/docs/Web/HTTP/Reference/Status/401)_（未授權）**
+
+```mermaid
+┌───────────┐                          ┌──────────┐                     ┌────────┐
+│Client User│                          │Web Server│                     │Database│
+└─────┬─────┘                          └────┬─────┘                     └───┬────┘
+      │                                     │                               │
+      │ 1. Login with Username and Password │                               │
+      │────────────────────────────────────>│                               │
+      │                                     │                               │
+      │                                     │2. Check user data and validate│
+      │                                     │──────────────────────────────>│
+      │                                     │                               │
+      │                                     │      3. Valid user data       │
+      │                                     │<──────────────────────────────│
+      │                                     │                               │
+      │      4. Send JWT(Bearer token)      │                               │
+      │<────────────────────────────────────│                               │
+      │                                     │                               │
+      │   5. Request for protected data     │                               │
+      │      Send Bearer token              │                               │
+      │────────────────────────────────────>│                               │
+      │                                     │                               │
+      │       6. Token is valid and         │                               │
+      │          Send protected data        │                               │
+      │<────────────────────────────────────│                               │
+      │                                     │                               │
+      │6. Token is invalid or no permission │                               │
+      │   return Http 401 or Http 403       │                               │
+      │<────────────────────────────────────│                               │
+┌─────┴─────┐                          ┌────┴─────┐                     ┌───┴────┐
+│Client User│                          │Web Server│                     │Database│
+└───────────┘                          └──────────┘                     └────────┘
+```
+
+### 安裝 JwtBearer
+
+開啟 NuGet，輸入 **`Microsoft.AspNetCore.Authentication.JwtBearer`**，並安裝，安裝流程可以參考 **_[安裝套件](#安裝套件)_**，**記得安裝符合自已的 .NET 版本**，我的本機是 .NET 8 所以我只能安裝 8.x.x 的版本，詳細可以參考 **_[NuGet JwtBearer](https://www.nuget.org/packages/Microsoft.AspNetCore.Authentication.JwtBearer/)_**
+
+### 修改登入方法
+
+由上面的流程圖可以知道，JWT 的驗證，會回傳 Http 的結果，因此要統一每個 API 回傳的型別，原 `LoginAsync` 方法回傳的登入的相關訊息（string），現在為了回傳 `Http XXX` 要修改回傳資料的型別如下
+
+```csharp
+/// <summary>
+/// 登入
+/// </summary>
+/// <param name="loginDto"> 使用者的輸入資料 </param>
+/// <returns> 登入結果 </returns>
+[HttpPost("login")]
+// 原本回傳型別是 Task<string> 是上一節為了測試而簡化
+// 改成 Task<ActionResult<string>>，為了可以回傳 Http 結果
+// Ok, BadRequest 都是繼承自 ActionResult 的類別
+// 所以可以用 ActionResult 封裝
+// Ok 會變成 Http 200
+// BadRequest 會變成 Http 400
+public async Task<ActionResult<string>> LoginAsync(LoginDto loginDto)
+{
+    // 登入資料驗證
+    if (string.IsNullOrEmpty(loginDto.Email) ||
+        string.IsNullOrEmpty(loginDto.Password))
+        return BadRequest("Please provide 'Email' and 'Password'");
+
+    // 檢查員工帳號
+    if (await _employeeService.GetEmployeeByEmailAsync(loginDto.Email) == null)
+        return BadRequest("User does not exist!");
+
+    // 檢查員工密碼並回傳登入結果
+    if (!await _authService.ValidateUserAsync(loginDto))
+        return BadRequest("Login failed!");
+
+    // 產生 Jwt 方法
+
+    return Ok("JWT Token");
+}
+```
+
+### JWT 設定
+
+回故一下，JWT 所需要的加載的資料內容，參考 **_[JWT Payload](#payload)_**，有一些資料是相對靜態的，所以可以設定在 `appsettings.json` 中，從設定檔中讀取，如 iss（發行單位），**到期時間**。
+
+這要要特別說明一下 **到期時間**，通常會是指從 **發行 JWT 之後，持續多久（月，天，分），並不是指一個故定的到期時間點，所以這個持續多久是可以固定下來的，因此可以寫在設定檔**。如果是某一固定時間點的話，會變成不管什麼時候發行的 Token，都會在那一個時間點失效，即使是在有效期之後發行的也是一樣，會造成還沒發行就失效了，所以不合理。
+
+開啟 `appsettings.json`，新增「**JwtOptions**」設定，如明如下
+
+- **Expiry：有效期限（分）**，我預設是分鐘，比較方便測試，有需要也可以當成天
+- **Issuer：發行單位**，我輸入這個專案的名稱
+- **SecretKey：加密金鑰，隨便輸入的字**，不一定要跟我一樣，另外這只是因**為教學紀錄的專案**，並沒有涉及機密資料，**實際的產品應用上，是不能洩漏加密金鑰的**
+
+```json
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "JwtOptions": {
+    "Expiry": 5,
+    "Issuer": "JWT-Authentication-API",
+    "SecretKey": "This-is-secret-key-for-JWT-Authentication"
+  }
+}
+```
+
+### 加載 JWT 設定
+
+有兩種方式可以讀取設定檔
+
+1. 使用 Configuration 注入
+
+```csharp
+// 用建構函數傳入
+public class TargetClass(IConfiguration configuration)
+{
+    // 在要被注入的類別中宣告 Configuration 的物件
+    private readonly IConfiguration _configuration = configuration;
+
+    public void Foo() {
+        // 讀取設定值 "第一層Key:第二層Key"
+        var secretKey = _configuration.GetValue<string>("JwtSettings:SecretKey");
+        // 或
+        // 用 GetSection 方法先取得第一層的物件
+        // 再用 GetValue 取得第二層 Key 的設定值
+        var secretKey = _configuration.GetSection("JwtSettings").GetValue<string>("SecretKey");
+
+        // 上面兩種寫法效果是一樣的
+    }
+}
+```
+
+2. 自定義一個設定類別，將設定值物件化
+
+我採用第二個方法，為強化資料型別管理，但會比較麻煩，可以自行取舍
+
+#### 定義一個設定類別
+
+在專案下新增 `Options` 目錄，**用來存放設定物件的類別**，在目錄下新增一個 `JwtOptions.cs`，並依 `appsettings.json` 的相關設定定義資料欄位如下
+
+※ 同樣都是承載資料的模型物件，為什麼不放在 `Models` 目錄？**因為 Settings 或 Options 相關的資料物件只會用在程式中資料的設定，不會與資料庫的資庫互動**，這樣語意更清析
+
+```csharp
+namespace JWT_Authentication_API.Options;
+
+/// <summary>
+/// Jwt 的設定物件
+/// </summary>
+public class JwtOptions
+{
+    /// <summary>
+    /// 有效期限（分），預設 10 分鐘
+    /// </summary>
+    public int Expiry  { get; set; } = 10;
+
+    /// <summary>
+    /// 發行單位
+    /// </summary>
+    public string Issuer { get; set; } = "JWT_Authentication_API";
+
+    /// <summary>
+    /// 加密金鑰
+    /// </summary>
+    public string SecretKey { get; set; } = Guid.NewGuid().ToString();
+}
+```
+
+接下來在 `Program.cs` 中註冊這個自定定的 `JwtOption` 類別，**並封裝在 IOptions 的類別中**，在 `AddScoped` 方法的後面加入註冊方法如下
+
+```csharp
+#region CustomService
+builder.Services
+    .AddScoped<IEmployeeService, EmployeeService>()
+    .AddScoped<IAuthService, AuthService>()
+    // 註冊這個 JwtOptions 的物件，並封裝成 IOptions 型別，讓其他類別可以注入使用
+    .Configure<JwtOptions>(builder.Configuration.GetSection(nameof(JwtOptions)));
+#endregion
+```
+
+設定的前置就完成了，可以在 Jwt 相關類別中使用
+
+### 產生 JWT
+
+為了產生合法的 JWT，在專案下新增一個 `Helper` 目錄，用來存放**輔助的相關類別**，在目錄下新增一個 **`JwtHelper.cs` 用來加載 JWT 的設定並產生 JWT**
+
+#### 注入 JwtOptions
+
+先注入 JWT 的相關設定
+
+```csharp
+using JWT_Authentication_API.Options;
+using Microsoft.Extensions.Options;
+
+namespace JWT_Authentication_API.Helper;
+
+/// <summary>
+/// JSON Web Token 輔助工具
+/// 注入 JwtOptions
+/// </summary>
+public class JwtHelper(IOptions<JwtOptions> jwtOptions)
+{
+    /// <summary>
+    /// Jwt 的相關設定
+    /// </summary>
+    private readonly JwtOptions _jwtOptions = jwtOptions.Value;
+}
+```
+
+#### 將使用者登入資訊加入 Payload 中
+
+使用者**資訊會使用 `List<Claim>`** 中，**一個 `Claim` 就是使用者的其中一項資料**，
+可以想成 **出國用的護照**
+
+- **護照號碼：是一個 Claim**
+- **中文姓名：是一個 Claim**
+- **英文姓名（拼音）：是一個 Claim**
+- **照片：是一個 Claim**
+- **國籍：是一個 Claim**
+
+**而上面這麼多個 Claim 就會組成護照，變成出國用的身分證明，只是在網路的世界，使用者的身份證明變成了 `List<Claim>` 型式，而在 JWT 的應用場景中，Claim 變成了 JWT 所需要的資料**，在 `JwtHelper` 中新增一個 `CreateJwt` 方法，並傳入使用者資料，寫入 payload，如下
+
+```csharp
+/// <summary>
+/// 產生 JWT
+/// </summary>
+/// <param name="loginDto"> 使用者的登入資訊 </param>
+/// <returns> JSON Web Token </returns>
+public string CreateJwt(LoginDto loginDto)
+{
+    var now = DateTimeOffset.UtcNow;
+
+    // 設定 Payload
+    List<Claim> claims = [
+        // 發行單位
+        new(JwtRegisteredClaimNames.Iss, _jwtOptions.Issuer),
+        // 使用者帳號作為識別
+        new(JwtRegisteredClaimNames.Sub, loginDto.Email),
+        // Token 的有效期限，從現在開始到 5 分鐘後
+        new(JwtRegisteredClaimNames.Exp, $"{now.AddMinutes(_jwtOptions.Expiry)
+            .ToUnixTimeSeconds()}"),
+        // 這個 JWT 的識別
+        new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+        // 這個 JWT 的發行時間
+        new(JwtRegisteredClaimNames.Iat, $"{now.ToUnixTimeSeconds()}")
+    ];
+    // 產生使用者身分證明
+    ClaimsIdentity userClaimsIdentity = new(claims);
+    // 產生私鑰供後續加密使用
+    SymmetricSecurityKey securityKey = new(Encoding.UTF8.GetBytes(_jwtOptions.SecretKey));
+    // 產生數位簽章憑證，使用 SHA256 加密演算
+    SigningCredentials credentials = new(securityKey, SecurityAlgorithms.HmacSha256);
+
+    // 產生 JWT
+    JwtSecurityToken securityToken = new(
+        issuer: _jwtOptions.Issuer,             // issuer
+        claims: userClaimsIdentity.Claims,      // payload
+        signingCredentials: credentials,        // signature
+        expires: now.AddMinutes(_jwtOptions.Expiry).DateTime);  // expiry time
+
+    // 輸出 JWT 並轉換成字串
+    return new JwtSecurityTokenHandler().WriteToken(securityToken);
+}
+```
+
+在 `Program.cs` 中，註冊 `JwtHelper`，因為 JwtHelper 的設定是固定不變的，所以不像 `EmployeeService` 只會存在某些特定的 Controller 中，一但 Request 的生命週期結束，依賴的 Service 就必需要結束，所以 **JwtHelper 要使用 `AddSingleton` 來註冊**
+
+```csharp
+// 註冊 JwtHelper
+builder.Services.AddSingleton<JwtHelper>();
+```
+
+回到 `AuthController` 將產生 JWT 的部分補上
+
+```csharp
+/// <summary>
+/// 將 AuthController 宣告成為 ApiController
+/// 並定義路由規則（網址）=> domain/api/auth
+/// </summary>
+/// <param name="employeeService"> 員工資料存取服務 </param>
+/// <param name="authService"> 登入驗證服務 </param>
+/// <param name="jwtHelper"> JWT 輔助工具 </param>
+[ApiController, Route("api/[controller]")]
+public class AuthController(
+    IEmployeeService employeeService,
+    IAuthService authService,
+    JwtHelper jwtHelper) : Controller
+{
+    /// <summary>
+    /// 員工資料存取的服務
+    /// </summary>
+    private readonly IEmployeeService _employeeService = employeeService;
+    /// <summary>
+    /// 登入驗證的服務
+    /// </summary>
+    private readonly IAuthService _authService = authService;
+    /// <summary>
+    /// JWT 輔助工具，負責生成 JWT
+    /// </summary>
+    private readonly JwtHelper _jwtHelper = jwtHelper;
+
+    #region 註冊
+    ......
+    #endregion
+
+    #region 登入
+    /// <summary>
+    /// 登入
+    /// </summary>
+    /// <param name="loginDto"> 使用者的輸入資料 </param>
+    /// <returns> 登入結果 </returns>
+    [HttpPost("login")]
+    public async Task<ActionResult<string>> LoginAsync(LoginDto loginDto)
+    {
+        // 登入資料驗證
+        if (string.IsNullOrEmpty(loginDto.Email) ||
+            string.IsNullOrEmpty(loginDto.Password))
+            return BadRequest("Please provide 'Email' and 'Password'");
+
+        // 檢查員工帳號
+        if (await _employeeService.GetEmployeeByEmailAsync(loginDto.Email) == null)
+            return BadRequest("User does not exist!");
+
+        // 檢查員工密碼並回傳登入結果
+        if (!await _authService.ValidateUserAsync(loginDto))
+            return BadRequest("Login failed!");
+
+        // 產生 Jwt
+        var jwt = _jwtHelper.CreateJwt(loginDto);
+
+        return Ok(jwt);
+    }
+    #endregion
+}
+```
+
+### 驗證 JWT
+
+完成 JWT 的部分後，就可以來測試了，由於在 **_[Login](#測試-login)_**．已經註冊過 peter 這個帳號了，現在用 peter 這個帳號來測試會不會回傳 JWT，也可以順便知道資料庫的運作，是不是真會存在 peter 這筆帳號資料
+
+![JWT Test](jwt-test.png)
+
+如果有看到 JWT 成功回傳，就代表登入方法成功了，同時也確認資料庫存取是沒有問題的
+接著請把 JWT 複製，貼到 **[JWT IO](https://jwt.io/)** 的網站，它會協助驗證 JWT 的格式有沒有正確
+
+![JWT IO Validate](jwt-io.png)
+
+由上面的結果可以知道，JWT 結果和我寫入的一樣，這樣登入功能就完成了，這邊順便說一下，右下方的 Secret 驗證，其實是驗證金鑰的正確性，一般來說不會把金鑰公開，不過我這邊為了範例，我測試一下，把 **_[`appsettings.json`](#jwt-設定)_** 的 `SecretKey` 複製貼上
+
+![JWT secret validation](jwt-secret-validation.png)
+
+會發現 SecretKey 也是 ok 的，這樣就驗證完成了
