@@ -161,15 +161,15 @@ createSignature(jwt) {
 
 其他可以不要動，如下圖
 
-![Create New Web API Project](create-new-project.png)
+![Create New Web API Project](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/create-new-project.png)
 
 接著可以執行，按下右上角 **綠色 bug** 旁邊有一個 **綠色 play**
 
-![Run project](run-project.png)
+![Run project](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/run-project.png)
 
 如果有看到 Swagger 的畫面而且網頁的主標題是專案名稱就是專案建立成功
 
-![Swagger Result](swagger-result.png)
+![Swagger Result](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/swagger-result.png)
 
 開啟 `Program.cs`，將預設的 api 程式碼清掉，保留部分如下
 
@@ -208,23 +208,23 @@ app.Run();
 
 在 Rider 左下有一欄選單，可以找到 NuGet
 
-![NuGet](nuget.png)
+![NuGet](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/nuget.png)
 
 在搜尋框中輸入套件名稱「**EntityFrameworkCore.SqlServer**」，通常第一個就會是我們要的結果，在 NuGet 視窗右半邊會看到版本，由於 .NET8 可以相容到 9.0.3 的版本，所以版本選「**9.0.3**」，當然你也可以選擇適合你本機環境的版本，如果你不是使用 .NET8 的話
 
 在右半邊下方會看到專案的列表，我目前只有一個專案，所以只會出現一個，接著在要安裝的專案按下「**+**」就會安裝了，如下圖
 
-![NuGet EntityFrameworkCore](nuget-entity-framework-core.png)
+![NuGet EntityFrameworkCore](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/nuget-entity-framework-core.png)
 
 會出現提示安裝的對話框，按下確定，另外一個套件再操作一次同樣的步驟
 
-![Nuget install confirm](nuget-install-confirm.png)
+![Nuget install confirm](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/nuget-install-confirm.png)
 
 ### 指令安裝
 
 在 Rider 開啟終端機（Terminal）
 
-![Rider Terminal](rider-termial.png)
+![Rider Terminal](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/rider-termial.png)
 
 輸入安裝指令如下，我撰寫這一篇文的時候是最新穩定版是 9.0.3，之後可能會更新，可以在上方 **_[安裝套件](#安裝套件)_** 找到最新資訊
 
@@ -245,9 +245,9 @@ dotnet add package Microsoft.EntityFrameworkCore.Design --version 9.0.3
 
 並 `Entities` 目錄下新增 `Employee.cs` 檔案，作為**員工資料模型**，如下圖
 
-![Create new folder and class file](create-new-folder-and-file.png)
+![Create new folder and class file](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/create-new-folder-and-file.png)
 
-![Create Employee entity](create-employee-entity.png)
+![Create Employee entity](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/create-employee-entity.png)
 
 員工資料模型內容如下
 
@@ -371,52 +371,52 @@ builder.Services.AddDbContext<AppDbContext>(optionsBuilder =>
 
 接著在專案右鍵 → Entity Framework Core → Add Migration
 
-![Add Migration](add-migration.png)
+![Add Migration](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/add-migration.png)
 
 按下「OK」
 
-![Initial Migration](initial-migration.png)
+![Initial Migration](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/initial-migration.png)
 
 會在下方看到 EF Core 建立 Migration 的結果，如果沒有錯誤訊息（如下），就是成功了
 
-![Migration Finished.](migration-finish.png)
+![Migration Finished.](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/migration-finish.png)
 
 成功後會看到專案下出現了 **Migration 的目錄**，並且出現兩個檔案，是**紀錄資料模型的變更**，每更新一次模型，就會再多出兩個檔，其中一個檔案會以「**timestamp_MigrationName**」命名
 
-![Migration Folder](migration-folder.png)
+![Migration Folder](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/migration-folder.png)
 
 ### 更新資料庫
 
 接下來要將變更的模型，對映到資料庫，以產生實際的資料表\
 在專案右鍵 → Entity Framework Core → Update Database
 
-![Initial Update Database](init-update-database.png)
+![Initial Update Database](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/init-update-database.png)
 
 出現更新對話框，**Target migration，要設成上面產生的 migration 檔**，確認後按下 OK
 
-![Initial Update Database](init-update-database-1.png)
+![Initial Update Database](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/init-update-database-1.png)
 
 會在下方 EF Core 的視窗中看到執行**更新資料庫的過程及執行的 SQL 語法**，如果沒有看到錯誤訊息，就是成功了
 
-![Update Database Done](update-database-done.png)
+![Update Database Done](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/update-database-done.png)
 
 ### 驗證資料庫
 
 Rider 提供了一個資料庫的圖型介面，讓我們可以確認資料庫的內容，在最右邊會看到一個**資料庫的 icon，點擊後有一個「+」，選擇 Connect to Database**
 
-![Rider connect to database](rider-connet2database.png)
+![Rider connect to database](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/rider-connet2database.png)
 
 出現對話框後，選擇「**use connection string**」，將 **_[建立實體資料庫](#建立實體資料庫)_** 中的連線字串值（AppDB 不用）複製並貼上
 
-![Rider connect to database configuration](rider-connect-to-database-fonfiguration.png)
+![Rider connect to database configuration](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/rider-connect-to-database-fonfiguration.png)
 
 貼上後等它跑一下，會出現 **Test Connection，可以測試連線字串正確性**，但一般來說，在貼上的時候，Rider 就會自動幫你測試了，確認無誤後可以按下「Connect to Database」連線到資料庫
 
-![Rider connect to database test](rider-connect-to-databaase-test.png)
+![Rider connect to database test](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/rider-connect-to-databaase-test.png)
 
 就可以順利看到資料庫了
 
-![Database finished](database-finished.png)
+![Database finished](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/database-finished.png)
 
 資料庫建立完成後，就可以開始實作「註冊」、「登入」、「登出」功能了
 
@@ -424,9 +424,9 @@ Rider 提供了一個資料庫的圖型介面，讓我們可以確認資料庫�
 
 首先新增一個 `Controllers` 目錄，在目錄中再新增 `AuthController.cs`
 
-![Add AuthController](add-auth-controller.png)
+![Add AuthController](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/add-auth-controller.png)
 
-![Add AuthController dialog](add-auth-controller-dialog.png)
+![Add AuthController dialog](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/add-auth-controller-dialog.png)
 
 新增完成後，將下 `AuthController.cs` 預設的方法刪掉，並宣告成 ApiController 如下
 
@@ -520,7 +520,7 @@ public ActionResult Register(RegisterDto registerDto)
 
 在 NuGet 中搜尋「**scalar**」找到「**_[Scalar.AspNetCore](https://www.nuget.org/packages/Scalar.AspNetCore/)_**」並安裝
 
-![NuGet scalar](nuget-scalar.png)
+![NuGet scalar](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/nuget-scalar.png)
 
 在 `Program.cs` 進行 scalar 的服務注入，影片中使用的版本是 `.NET 9` 的版本配置方式，我的環境是 `.NET 8` 的版本，所以略有不同\
 可以參考 **_[Scalar 基本設定](https://github.com/scalar/scalar/blob/main/documentation/integrations/dotnet.md#basic-setup)_** 及 **_[.NET 8 的 Scalar 設定方式](https://github.com/scalar/scalar/blob/main/documentation/integrations/dotnet.md#openapi-document-route)_**
@@ -561,7 +561,7 @@ app.MapControllers();
 
 參考 **_[建立專案](#建立專案)_** 的執行方式執行網站，將網址改成 `http://localhost:7274/scalar/v1`，你的 port 可能跟我的不一樣
 
-![Scalar UI](scalar-ui.png)
+![Scalar UI](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/scalar-ui.png)
 
 有兩種測試方式
 
@@ -572,15 +572,15 @@ app.MapControllers();
 
 這裡先採用執行後測試的方法，在上面執行的網頁畫面，點 `Auth` 下面的 Api 網址，再按下「**Test Request**」
 
-![Scalar Test Request](scalar-test-request.png)
+![Scalar Test Request](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/scalar-test-request.png)
 
 接著輸入要註冊的帳號密碼如下圖，只要有**看到 200 及使用者註冊資料回傳就算成功了**
 
-![Auth register test](auth-register-test.png)
+![Auth register test](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/auth-register-test.png)
 
 當然也可以測試，沒有帳號或沒有密碼的情況，看看驗證訊息是否正確，參考 **_[Register 方法](#httppostregister)_ 的第 10 ~ 12 行**，有得到預期的驗證訊息就算成功了
 
-![Register no password provide](auth-register-no-password-test.png)
+![Register no password provide](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/auth-register-no-password-test.png)
 
 ## 登入
 
@@ -1049,7 +1049,7 @@ builder.Services
 
 這邊示範用 Postman 進行測試，請先執行專案，確認執行成功後**開啟 Postman，並按下「+」新增一個 Request 分頁**
 
-![Open Postman](open-postman.png)
+![Open Postman](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/open-postman.png)
 
 將 Request 改成 「**POST**」，並輸入 API 網址，可以參考 **_[測試註冊](#測試註冊)_** 章節最後一張圖的網址
 
@@ -1065,24 +1065,24 @@ builder.Services
 
 要測試登入，所以一定要先註冊一個使用者，也順便用 Postman 測試註冊功能
 
-![Empty Test](postman-empty-test.png)
+![Empty Test](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/postman-empty-test.png)
 
-![No Password Test](postman-no-password-test.png)
+![No Password Test](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/postman-no-password-test.png)
 
-![Register Test](postman-register-test.png)
+![Register Test](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/postman-register-test.png)
 
 將網址改成登入的 API 網址，測試登入
 
-![Login Success](postman-login-success.png)
+![Login Success](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/postman-login-success.png)
 
-![Login Failed Test](postman-login-failed-test.png)
+![Login Failed Test](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/postman-login-failed-test.png)
 
 ## JWT
 
 接下來要實作產生 JWT 的方法，並將上一節 `LoginAsync` 方法回傳值改成所產生的 JWT
 
 下圖簡單的說明 JWT 的驗證流程\
-1, 2, 3 上一節已經實作了，不再說明\
+1, 2, 3 上一節已經實作了，不再說明
 
 4. 如果登入登入成功，就合回傳一個合法的 JWT
 5. 使用者需要存取授權的資源時，會將 JWT 傳送至 Server 進行驗證
@@ -1429,16 +1429,16 @@ public class AuthController(
 
 完成 JWT 的部分後，就可以來測試了，由於在 **_[Login](#測試-login)_**．已經註冊過 peter 這個帳號了，現在用 peter 這個帳號來測試會不會回傳 JWT，也可以順便知道資料庫的運作，是不是真會存在 peter 這筆帳號資料
 
-![JWT Test](jwt-test.png)
+![JWT Test](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/jwt-test.png)
 
 如果有看到 JWT 成功回傳，就代表登入方法成功了，同時也確認資料庫存取是沒有問題的
 接著請把 JWT 複製，貼到 **[JWT IO](https://jwt.io/)** 的網站，它會協助驗證 JWT 的格式有沒有正確
 
-![JWT IO Validate](jwt-io.png)
+![JWT IO Validate](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/jwt-io.png)
 
 由上面的結果可以知道，JWT 結果和我寫入的一樣，這樣登入功能就完成了，這邊順便說一下，右下方的 Secret 驗證，其實是驗證金鑰的正確性，一般來說不會把金鑰公開，不過我這邊為了範例，我測試一下，把 **_[`appsettings.json`](#jwt-設定)_** 的 `SecretKey` 複製貼上
 
-![JWT secret validation](jwt-secret-validation.png)
+![JWT secret validation](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/jwt-secret-validation.png)
 
 會發現 SecretKey 也是 ok 的，這樣就驗證完成了
 
@@ -1640,18 +1640,18 @@ public class AuthController(
 
 最後來測試登出功能，啟動專案並執行 Postman，網址輸入登出的，下面的頁籤選「**Authorization**」，**Type** 選第三個「**Bearer Token**」
 
-![Bearer token settings](bearer-token-settings.png)
+![Bearer token settings](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/bearer-token-settings.png)
 
 接著按下「Send」
 
-![No Token provided](no-token-provided.png)
+![No Token provided](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/no-token-provided.png)
 
 會發現出現沒 Token 的訊息，因為我們沒有提供 Token（上面的輸入框），同時也代表登出的檢查有成功，現在先去登入取得一個 Token 並複製下來，參考 **_[驗證 JWT](#驗證-jwt)_**，貼上「**Token 輸入框**」，按下 Send
 
-![Token provide](token-provided.png)
+![Token provide](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/token-provided.png)
 
 如果有看到登出訊息就是成功了
 
-![Logout Successfully](logout-success.png)
+![Logout Successfully](ttps://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/logout-success.png)
 
 到這邊，註冊、登入、登出就完成了，下篇下會介紹及實作 Refresh Token！
