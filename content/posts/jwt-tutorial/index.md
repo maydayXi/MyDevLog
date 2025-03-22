@@ -3,7 +3,7 @@ date: "2025-03-15T16:43:21+08:00"
 draft: false
 title: ASP.NET Core 實作 JWT 認證
 description: 使用 JSON Web Token 實現安全的認證機制
-lastmod: 2025-03-21T01:56:49
+lastmod: 2025-03-23T01:19:35
 categories:
   - WebSite
 tags:
@@ -1441,3 +1441,217 @@ public class AuthController(
 ![JWT secret validation](jwt-secret-validation.png)
 
 會發現 SecretKey 也是 ok 的，這樣就驗證完成了
+
+## 登出
+
+最後要來做登出功能了，這邊採用比較簡單且直觀的方式「**黑名單**」，也就是將已經使用過的 JWT 寫入黑名單來代表登出，這樣就無法再次使用一樣的 token 進行其他操作。
+
+為了建立黑名單，要先**建立一個「黑名單的資料模型」**，在 `Entities` 目錄新增 `TokenBlackList.cs` 如下
+
+```csharp
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace JWT_Authentication_API.Entities;
+
+/// <summary>
+/// JWT 的黑名單
+/// </summary>
+public class TokenBlackList
+{
+    /// <summary>
+    /// 資料識別（PK）
+    /// </summary>
+    [Required, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public Guid Id { get; set; }
+    /// <summary>
+    /// 使用過的 Token
+    /// </summary>
+    [Required]
+    public string Token { get; set; } = string.Empty;
+    /// <summary>
+    /// 資料新增的時間，也是 Token 過期的時間
+    /// </summary>
+    public DateTimeOffset CreateTime { get; set; } = DateTimeOffset.Now;
+}
+```
+
+接著在 `AppDbContext.cs` 加入 `TokenBlackList` 的對映參考，加完程式碼會變成下面這樣
+
+```csharp
+using Microsoft.EntityFrameworkCore;
+
+namespace JWT_Authentication_API.Entities;
+
+/// <summary>
+/// Database Context
+/// </summary>
+/// <param name="options"></param>
+public class AppDbContext(DbContextOptions<AppDbContext> options)
+    : DbContext(options)
+{
+    /// <summary>
+    /// 員工資料表
+    /// </summary>
+    public DbSet<Employee> Employees { get; set; }
+    /// <summary>
+    /// Token 黑名單資料表
+    /// </summary>
+    public DbSet<TokenBlackList> TokenBlackLists { get; set; }
+}
+```
+
+然後參考 **_[新增 Migration](#新增-migration)_** 加入新的資料表，然後為了要新增 Token 到黑名單，再新增相關服務及介面\
+在 `Interfaces` 目錄下新增 `ITokenService.cs`\
+在 `Services` 目錄下新增 `TokenService.cs` 並實作 `ITokenService`
+
+### ITokenService
+
+```csharp
+namespace JWT_Authentication_API.Interfaces;
+
+/// <summary>
+/// Token 相關服務的介面
+/// </summary>
+public interface ITokenService
+{
+    /// <summary>
+    /// 新增 token 到黑名單
+    /// </summary>
+    /// <param name="token"> 要新增的 token </param>
+    /// <returns> 新增結果 </returns>
+    Task<bool> AddTokenToTokenBlackListAsync(string token);
+}
+```
+
+### TokenService
+
+```csharp
+using JWT_Authentication_API.Entities;
+using JWT_Authentication_API.Interfaces;
+
+namespace JWT_Authentication_API.Services;
+/// <summary>
+/// Token 資料存取服務
+/// </summary>
+/// <param name="context"> 資料庫物件 </param>
+public class TokenService(AppDbContext context): ITokenService
+{
+    /// <summary>
+    /// 資料庫物件
+    /// </summary>
+    private readonly AppDbContext _appDb = context;
+
+    /// <summary>
+    /// 新增 Token 到黑名單
+    /// </summary>
+    /// <param name="token"> 要新增的 Token </param>
+    /// <returns> 新增結果 </returns>
+    public async Task<bool> AddTokenToTokenBlackListAsync(string token)
+    {
+        await _appDb.TokenBlackLists.AddAsync(new TokenBlackList { Token = token });
+        var result = await _appDb.SaveChangesAsync();
+
+        return result > 0;
+    }
+}
+```
+
+### 註冊 TokenService
+
+`Program.cs`
+
+```csharp
+#region CustomService
+builder.Services
+    // 註冊 EmployeeService
+    .AddScoped<IEmployeeService, EmployeeService>()
+    // 註冊 AuthService
+    .AddScoped<IAuthService, AuthService>()
+    // 註冊 TokenService
+    .AddScoped<ITokenService, TokenService>()
+    // 註冊這個 JwtOptions 的物件，並封裝成 IOptions 型別，讓其他類別可以注入使用
+    .Configure<JwtOptions>(builder.Configuration.GetSection(nameof(JwtOptions)));
+// 註冊 JwtHelper
+builder.Services.AddSingleton<JwtHelper>();
+#endregion
+```
+
+### 新增登出功能
+
+回到 `AuthController.cs` 加入 `ITokenService` 的注入，並新增 `LogoutAsync` 方法
+
+```csharp
+/// <summary>
+/// 將 AuthController 宣告成為 ApiController
+/// 並定義路由規則（網址）=> domain/api/auth
+/// </summary>
+/// <param name="employeeService"> 員工資料存取服務 </param>
+/// <param name="authService"> 登入驗證服務 </param>
+/// <param name="jwtHelper"> JWT 輔助工具 </param>
+[ApiController, Route("api/[controller]")]
+public class AuthController(
+    IEmployeeService employeeService,
+    IAuthService authService,
+    ITokenService tokenService,
+    JwtHelper jwtHelper) : Controller
+{
+    ......
+
+    /// <summary>
+    /// Token 相關服務
+    /// </summary>
+    private readonly ITokenService _tokenService = tokenService;
+
+    #region 註冊
+    ......
+    #endregion
+
+    #region 登入
+    ......
+    #endregion
+
+    #region 登出
+    /// <summary>
+    /// 登出
+    /// </summary>
+    /// <returns> 登出結果 </returns>
+    [HttpPost("logout")]
+    public async Task<IActionResult> LogoutAsync()
+    {
+        // 從 header 讀取 JWT
+        var token = $"{HttpContext.Request.Headers.Authorization}"
+            .Replace("Bearer", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Trim();
+        if (string.IsNullOrEmpty(token))
+            return BadRequest("Not token provided!");
+
+        // 將 JWT 加入黑名單
+        var result = await _tokenService.AddTokenToTokenBlackListAsync(token);
+        if (!result) return BadRequest("Logout failed!");
+
+        return Ok("Logout successfully!");
+    }
+    #endregion
+}
+```
+
+### 測試登出
+
+最後來測試登出功能，啟動專案並執行 Postman，網址輸入登出的，下面的頁籤選「**Authorization**」，**Type** 選第三個「**Bearer Token**」
+
+![Bearer token settings](bearer-token-settings.png)
+
+接著按下「Send」
+
+![No Token provided](no-token-provided.png)
+
+會發現出現沒 Token 的訊息，因為我們沒有提供 Token（上面的輸入框），同時也代表登出的檢查有成功，現在先去登入取得一個 Token 並複製下來，參考 **_[驗證 JWT](#驗證-jwt)_**，貼上「**Token 輸入框**」，按下 Send
+
+![Token provide](token-provided.png)
+
+如果有看到登出訊息就是成功了
+
+![Logout Successfully](logout-success.png)
+
+到這邊，註冊、登入、登出就完成了，下篇下會介紹及實作 Refresh Token！
