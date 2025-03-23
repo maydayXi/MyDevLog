@@ -1348,7 +1348,7 @@ public string CreateJwt(LoginDto loginDto)
         issuer: _jwtOptions.Issuer,             // issuer
         claims: userClaimsIdentity.Claims,      // payload
         signingCredentials: credentials,        // signature
-        expires: now.AddMinutes(_jwtOptions.Expiry).DateTime);  // expiry time
+        expires: now.AddMinutes(_jwtOptions.Expiry).UTCDateTime);  // expiry time
 
     // 輸出 JWT 並轉換成字串
     return new JwtSecurityTokenHandler().WriteToken(securityToken);
