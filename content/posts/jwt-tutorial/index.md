@@ -4,8 +4,9 @@ draft: false
 title: ASP.NET Core 實作 JWT 認證
 description: 使用 JSON Web Token 實現安全的認證機制
 lastmod: 2025-03-23T01:42:10
+slug: asp-dot-net-core-jwt-tutorial
 categories:
-  - WebSite
+  - Web API
 tags:
   - C#
   - ASP.NET Core
@@ -15,9 +16,9 @@ tags:
   - Authentication
   - Entity Framework Core
   - EF Core
+  - Dependency Injection
   - Rider
   - Postman
-  - Web API
 image: jwt-tutorial-featured.jpg
 links:
   - title: JWT Authentication with .NET 9
