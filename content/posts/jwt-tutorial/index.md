@@ -137,18 +137,16 @@ createSignature(jwt) {
 **PrivateKey（私鑰）是加密的關鍵之一，應該保存在伺服器，不可以外流**\
 **PrivateKey 及 Base64 非本編重點，這邊就不多加說明了**
 
-# 實作
+# 開發工具
 
 其實我自己也是第一次作 JWT 驗證功能，最下方有我實作時看的影片，可以參考，但由於我的 .NET 版本是 8 版，所以有些地方略略有不同。
-
-## 開發工具
 
 1. **_[Rider](https://www.jetbrains.com/rider/)_**\
    本來想用 Visual Studio 開發，不過由於要紀錄自己開發的過程，所以希望介面可以有善一點，最後決定使用 Rider 來作開發，也順便體驗 Rider 開發的感覺與 VS Code 有什麼不同。
 2. **Google Cloud**\
    主要作為資料庫，因為我的作業系統是 MacOS，所以使用 MS SQL Server 有一些不方便，所以在雲端上開了一個 MS SQL Server 作為資料庫連線使用，且在現實情境下，大部分的資料庫不會在同一個 Server，這邊也當作模擬真實的情景。
 
-## 建立專案
+# 建立專案
 
 開啟 Rider 新增一個 Web API 專案，輸入資訊如下
 
@@ -196,7 +194,7 @@ app.UseHttpsRedirection();
 app.Run();
 ```
 
-## 安裝套件
+# 安裝套件
 
 我採用 **Database-First 方式開發，也就是先建立資料模型再產生資料庫**，其中會使用到 **_[ORM（Object Relation Mapping）](https://zh.wikipedia.org/zh-tw/%E5%AF%B9%E8%B1%A1%E5%85%B3%E7%B3%BB%E6%98%A0%E5%B0%84)_ 物件關連對映**的技術，所以會用到幾個 Nuget 的套件
 
@@ -205,7 +203,7 @@ app.Run();
 
 可以採用指令安裝或介面安裝
 
-### 介面安裝
+## 介面安裝
 
 在 Rider 左下有一欄選單，可以找到 NuGet
 
@@ -221,7 +219,7 @@ app.Run();
 
 ![Nuget install confirm](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/nuget-install-confirm.png)
 
-### 指令安裝
+## 指令安裝
 
 在 Rider 開啟終端機（Terminal）
 
@@ -234,13 +232,13 @@ dotnet add package Microsoft.EntityFrameworkCore.SqlServer --version 9.0.3
 dotnet add package Microsoft.EntityFrameworkCore.Design --version 9.0.3
 ```
 
-## 建立資料模型
+# 建立資料模型
 
 以 ORM 的概念來說，可以把**一個 Entity 想像成一張資料表**
 
 在專案目錄下新增一個 `Entities` 的目錄，參考下圖，在「class/interface」選項下有一個「**Directory**」的選項，點擊後輸入目錄名稱 `Entities`，這個目錄將**存放所有與資料庫互動的資料模型檔**
 
-### Employee
+## Employee
 
 以**註冊、登入、登出**這三個功能來說，一張員工的資料表已經夠了
 
@@ -301,7 +299,7 @@ public class Employee
 2. **CreateOn, ModifyOn**：公司內部有時候會有某筆資料出問題的，經由某位員工或使用者反應，如**登入失敗**，**為了要追查使用軌跡，會加入相關的時間欄位**
 3. **Password**：密碼應該要加密後再存入資料庫，所以這個欄位會存放加密後的值。
 
-## 建立 DBContext
+# 建立 DBContext
 
 在建立資料模型有提到，在 ORM 中一個 Entity 是資料表的概念，**那 DBContext 就是一個資料庫的概念**，所以要建立一個專屬資料庫的類別作為資料庫的 Mapping，**這個類別需要繼承「DBContext」**
 
@@ -326,7 +324,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
 }
 ```
 
-## 建立實體資料庫
+# 建立實體資料庫
 
 資料模型及 DBContext 都建立好了之後，就可以建立實體資料庫了，在根目錄下開啟 `appsettings.json` 並**新增 ConnectionString（資料庫的連線字串）**如下
 
@@ -354,7 +352,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
 }
 ```
 
-### 注入資料庫服務
+## 注入資料庫服務
 
 開啟根目錄 `Program.cs`，注入資料庫服務
 
@@ -368,7 +366,7 @@ builder.Services.AddDbContext<AppDbContext>(optionsBuilder =>
 });
 ```
 
-### 新增 Migration
+## 新增 Migration
 
 接著在專案右鍵 → Entity Framework Core → Add Migration
 
@@ -386,7 +384,7 @@ builder.Services.AddDbContext<AppDbContext>(optionsBuilder =>
 
 ![Migration Folder](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/migration-folder.png)
 
-### 更新資料庫
+## 更新資料庫
 
 接下來要將變更的模型，對映到資料庫，以產生實際的資料表\
 在專案右鍵 → Entity Framework Core → Update Database
@@ -401,7 +399,7 @@ builder.Services.AddDbContext<AppDbContext>(optionsBuilder =>
 
 ![Update Database Done](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/update-database-done.png)
 
-### 驗證資料庫
+## 驗證資料庫
 
 Rider 提供了一個資料庫的圖型介面，讓我們可以確認資料庫的內容，在最右邊會看到一個**資料庫的 icon，點擊後有一個「+」，選擇 Connect to Database**
 
@@ -421,9 +419,9 @@ Rider 提供了一個資料庫的圖型介面，讓我們可以確認資料庫�
 
 資料庫建立完成後，就可以開始實作「註冊」、「登入」、「登出」功能了
 
-## AuthController
+# AuthController
 
-首先新增一個 `Controllers` 目錄，在目錄中再新增 `AuthController.cs`
+首先新增一個 `Controllers` 目錄，在目錄中再新增 `AuthController.cs` 作為所有驗證行為的端點
 
 ![Add AuthController](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/add-auth-controller.png)
 
@@ -449,7 +447,7 @@ public class AuthController : Controller
 - **ApiController：將目標控制器宣告成 API 控制器**
 - **Route：定義路由規則**，[controller] 會變成目標控制器的名字，最後與 domain 組合成 API 網址
 
-## 註冊
+# 註冊
 
 在 `AuthController.cs` 中新增註冊方法 **register，並且使用 HttpPost 方式呼叫，其中參數 "register" 是路由的一部分，會加在網址的最後**，有寫過 ASP.NET NVC 的話，很像傳統 MVC 的路由機制 **Controller/Action**，所以這個 **[HttpPost("register")]** 最後會變成 `domain/api/auth/register` 這個網址
 
@@ -461,7 +459,7 @@ public ActionResult Register()
 }
 ```
 
-### RegisterDto
+## RegisterDto
 
 接著需要一個 model 來負責接收註冊資料，在根目錄下新增 `Models` 目錄，在目錄下新增 `RegisterDto.cs`
 
@@ -486,7 +484,7 @@ public class RegisterDto
 }
 ```
 
-### HttpPostRegister
+## Register with HttpPost
 
 回到 `AuthController.cs` 補上註冊方法的程式碼如下，說明如註解
 
@@ -515,11 +513,9 @@ public ActionResult Register(RegisterDto registerDto)
 }
 ```
 
-### 測試註冊
+## 安裝 scalar
 
-#### 安裝 scalar
-
-在 NuGet 中搜尋「**scalar**」找到「**_[Scalar.AspNetCore](https://www.nuget.org/packages/Scalar.AspNetCore/)_**」並安裝
+註冊方法完成後，為方便測試，需要安裝 scalar 套件，在 NuGet 中搜尋「**scalar**」找到「**_[Scalar.AspNetCore](https://www.nuget.org/packages/Scalar.AspNetCore/)_**」並安裝
 
 ![NuGet scalar](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/nuget-scalar.png)
 
@@ -564,14 +560,16 @@ app.MapControllers();
 
 ![Scalar UI](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/scalar-ui.png)
 
+## 測試註冊
+
 有兩種測試方式
 
-1. 執行後直接測試
-2. 執行後使用 **_[Postman](https://www.postman.com/)_** 測試
+1. 執行後使用瀏覽器測試
+2. 使用 **_[Postman](https://www.postman.com/)_** 測試
 
-#### 執行後測試
+### 瀏覽器測試
 
-這裡先採用執行後測試的方法，在上面執行的網頁畫面，點 `Auth` 下面的 Api 網址，再按下「**Test Request**」
+這裡先採用瀏覽測試的方法，在上面執行的網頁畫面，點 `Auth` 下面的 Api 網址，再按下「**Test Request**」
 
 ![Scalar Test Request](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/scalar-test-request.png)
 
@@ -583,11 +581,11 @@ app.MapControllers();
 
 ![Register no password provide](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/auth-register-no-password-test.png)
 
-## 登入
+# 登入
 
 登入功能會涉及到資料庫，因為**需要將員工的註冊資料儲存到資料庫，並在登入時進行驗證**，所以會複雜一些
 
-### LoginDto
+## LoginDto
 
 跟註冊一樣，需要一個 Model 來紀錄傳送的登入資訊，所以在 `Model` 目錄下新增 `LoginDto.cs`\
 由於教學的場景**假設「註冊」與「登入」都只有傳送「帳號/密碼」**，所以可以偷懶一點直接繼承 `RegisterDto.cs`，但其他真實的場景可能會有一些差異，因些不建議直接繼承，且基於可讀性原則，我還是建一個 `LoginDto`
@@ -622,7 +620,7 @@ public class LoginDto: RegisterDto
 }
 ```
 
-### 分層架構
+## 分層架構
 
 接下來要將 `Register` 方法做一些修改，將使用者註冊資料存到資料庫中，好讓之後的「**登入**」方法可以使用，並採用**分層架構**，讓程式碼可讀性更高
 
@@ -733,7 +731,7 @@ public class EmployeeService(AppDbContext dbContext) : IEmployeeService
 }
 ```
 
-### 修改註冊方法
+## 修改註冊方法
 
 回到 `AuthController` 的 `Register` 方法並**加入員工服務物件的注入**，修改如下
 
@@ -802,7 +800,7 @@ builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 WebApplication app = builder.Build();
 ```
 
-### Login
+## Login
 
 正式開始實作登入，在 `AuthController.cs` 新增 `Login` 方法，**接收參數為使用者輸入的帳號密碼**\
 登入的部分可以分成兩步
@@ -810,7 +808,7 @@ WebApplication app = builder.Build();
 1. **檢查有沒有註冊這個員工**，上面在 **_[分層架構](#分層架構)_** 已經完成了，如果沒有就回傳錯誤訊息。
 2. **驗證員工帳號密碼**：如果第 1 步有找到註冊的員工資料，就要驗證輸入的帳號密碼，最後回傳驗證結果。
 
-詳細流程如下
+### 流程圖
 
 ```mermaid
         ┌─────┐
@@ -875,7 +873,7 @@ public async Task<string> LoginAsync(LoginDto loginDto)
 }
 ```
 
-#### 驗證員工密碼
+### 驗證員工密碼
 
 員工密碼的檢查屬於「驗證」的範疇，所以不能寫在 `Employee` 的相關服務及定義\
 在 `Interface` 目錄下新增 `IAuthService.cs`，在 `Services` 目錄下新增 `AuthService.cs`
@@ -1046,7 +1044,7 @@ builder.Services
 #endregion
 ```
 
-### 測試 Login
+## 測試 Login
 
 這邊示範用 Postman 進行測試，請先執行專案，確認執行成功後**開啟 Postman，並按下「+」新增一個 Request 分頁**
 
@@ -1078,7 +1076,7 @@ builder.Services
 
 ![Login Failed Test](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial/postman-login-failed-test.png)
 
-## JWT
+# JWT
 
 接下來要實作產生 JWT 的方法，並將上一節 `LoginAsync` 方法回傳值改成所產生的 JWT
 
@@ -1126,11 +1124,11 @@ builder.Services
 └───────────┘                          └──────────┘                     └────────┘
 ```
 
-### 安裝 JwtBearer
+## 安裝 JwtBearer
 
-開啟 NuGet，輸入 **`Microsoft.AspNetCore.Authentication.JwtBearer`**，並安裝，安裝流程可以參考 **_[安裝套件](#安裝套件)_**，**記得安裝符合自已的 .NET 版本**，我的本機是 .NET 8 所以我只能安裝 8.x.x 的版本，詳細可以參考 **_[NuGet JwtBearer](https://www.nuget.org/packages/Microsoft.AspNetCore.Authentication.JwtBearer/)_**
+為了產生 JWT 及驗證 JWT，需要安裝這個套件，**不過我沒有想到篇幅會這麼長，所以驗證的部分我會拉到下一篇教學**，開啟 NuGet，輸入 **`Microsoft.AspNetCore.Authentication.JwtBearer`**，並安裝，安裝流程可以參考 **_[安裝套件](#安裝套件)_**，**記得安裝符合自已的 .NET 版本**，我的本機是 .NET 8 所以我只能安裝 8.x.x 的版本，詳細可以參考 **_[NuGet JwtBearer](https://www.nuget.org/packages/Microsoft.AspNetCore.Authentication.JwtBearer/)_**
 
-### 修改登入方法
+## 修改登入方法
 
 由上面的流程圖可以知道，JWT 的驗證，會回傳 Http 的結果，因此要統一每個 API 回傳的型別，原 `LoginAsync` 方法回傳的登入的相關訊息（string），現在為了回傳 `Http XXX` 要修改回傳資料的型別如下
 
@@ -1168,7 +1166,7 @@ public async Task<ActionResult<string>> LoginAsync(LoginDto loginDto)
 }
 ```
 
-### JWT 設定
+## JWT 設定
 
 回故一下，JWT 所需要的加載的資料內容，參考 **_[JWT Payload](#payload)_**，有一些資料是相對靜態的，所以可以設定在 `appsettings.json` 中，從設定檔中讀取，如 iss（發行單位），**到期時間**。
 
@@ -1225,11 +1223,9 @@ public class TargetClass(IConfiguration configuration)
 
 2. 自定義一個設定類別，將設定值物件化
 
-我採用第二個方法，為強化資料型別管理，但會比較麻煩，可以自行取舍
+### JwtOptions
 
-#### 定義一個設定類別
-
-在專案下新增 `Options` 目錄，**用來存放設定物件的類別**，在目錄下新增一個 `JwtOptions.cs`，並依 `appsettings.json` 的相關設定定義資料欄位如下
+我採用第二個方法，為強化資料型別的管理，但會比較麻煩，可以自行取舍，在專案下新增 `Options` 目錄，**用來存放設定物件的類別**，在目錄下新增一個 `JwtOptions.cs`，並依 `appsettings.json` 的相關設定定義資料欄位如下
 
 ※ 同樣都是承載資料的模型物件，為什麼不放在 `Models` 目錄？**因為 Settings 或 Options 相關的資料物件只會用在程式中資料的設定，不會與資料庫的資庫互動**，這樣語意更清析
 
@@ -1272,11 +1268,11 @@ builder.Services
 
 設定的前置就完成了，可以在 Jwt 相關類別中使用
 
-### 產生 JWT
+## 產生 JWT
 
 為了產生合法的 JWT，在專案下新增一個 `Helper` 目錄，用來存放**輔助的相關類別**，在目錄下新增一個 **`JwtHelper.cs` 用來加載 JWT 的設定並產生 JWT**
 
-#### 注入 JwtOptions
+### 注入 JwtOptions
 
 先注入 JWT 的相關設定
 
@@ -1299,7 +1295,7 @@ public class JwtHelper(IOptions<JwtOptions> jwtOptions)
 }
 ```
 
-#### 將使用者登入資訊加入 Payload 中
+### 將使用者登入資訊加入 Payload 中
 
 使用者**資訊會使用 `List<Claim>`** 中，**一個 `Claim` 就是使用者的其中一項資料**，
 可以想成 **出國用的護照**
@@ -1426,7 +1422,7 @@ public class AuthController(
 }
 ```
 
-### 驗證 JWT
+## 驗證 JWT
 
 完成 JWT 的部分後，就可以來測試了，由於在 **_[Login](#測試-login)_**．已經註冊過 peter 這個帳號了，現在用 peter 這個帳號來測試會不會回傳 JWT，也可以順便知道資料庫的運作，是不是真會存在 peter 這筆帳號資料
 
@@ -1443,7 +1439,7 @@ public class AuthController(
 
 會發現 SecretKey 也是 ok 的，這樣就驗證完成了
 
-## 登出
+# 登出
 
 最後要來做登出功能了，這邊採用比較簡單且直觀的方式「**黑名單**」，也就是將已經使用過的 JWT 寫入黑名單來代表登出，這樣就無法再次使用一樣的 token 進行其他操作。
 
@@ -1506,7 +1502,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
 在 `Interfaces` 目錄下新增 `ITokenService.cs`\
 在 `Services` 目錄下新增 `TokenService.cs` 並實作 `ITokenService`
 
-### ITokenService
+## ITokenService
 
 ```csharp
 namespace JWT_Authentication_API.Interfaces;
@@ -1525,7 +1521,7 @@ public interface ITokenService
 }
 ```
 
-### TokenService
+## TokenService
 
 ```csharp
 using JWT_Authentication_API.Entities;
@@ -1558,7 +1554,7 @@ public class TokenService(AppDbContext context): ITokenService
 }
 ```
 
-### 註冊 TokenService
+## 註冊 TokenService
 
 `Program.cs`
 
@@ -1578,7 +1574,7 @@ builder.Services.AddSingleton<JwtHelper>();
 #endregion
 ```
 
-### 新增登出功能
+## Logout
 
 回到 `AuthController.cs` 加入 `ITokenService` 的注入，並新增 `LogoutAsync` 方法
 
@@ -1637,7 +1633,7 @@ public class AuthController(
 }
 ```
 
-### 測試登出
+## 測試登出
 
 最後來測試登出功能，啟動專案並執行 Postman，網址輸入登出的，下面的頁籤選「**Authorization**」，**Type** 選第三個「**Bearer Token**」
 
