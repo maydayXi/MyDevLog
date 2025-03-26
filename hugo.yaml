@@ -1,6 +1,6 @@
 baseURL: https://example.org/
 # baseURL: https://maydayxi.github.io/MyDevLog
-canonifyURLs: true
+# canonifyURLs: true
 theme: hugo-theme-stack
 title: My Dev Log
 copyright: MyDevLog
