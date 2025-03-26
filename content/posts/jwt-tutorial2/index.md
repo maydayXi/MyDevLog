@@ -69,7 +69,7 @@ public async Task<IActionResult> LogoutAsync()
 
 再使用 Postman Send 登入的請求取得一個合法的 JWT，接著使用剛剛取得的 JWT Send 一個登出請求，會發現出現了 Exception
 
-![Logout Exception](logout-exception.png)
+![Logout Exception](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial2/logout-exception.png)
 
 **System.InvalidOperationException: No authenticationScheme was specified, and there was no DefaultChallengeScheme found. The default schemes can be set using either AddAuthentication(string defaultScheme) or AddAuthentication(Action&lt;AuthenticationOptions&gt; configureOptions).**
 
@@ -255,11 +255,11 @@ app.Run();
 
 好了就可以來測試驗證了，先用 Postman 登入取得合法的 Toke，可以看到期限是 5 分鐘後到期
 
-![Postman get token](postman-get-token.png)
+![Postman get token](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial2/postman-get-token.png)
 
 等過了時間再登出，會發現出現了 **Http 401 的回應，就是驗證沒過**
 
-![Logout Http 401](logout-http-401.png)
+![Logout Http 401](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial2/logout-http-401.png)
 
 這樣驗證功能就完成了
 
@@ -357,13 +357,13 @@ public class Employee
 ```
 
 修改完成後記得使用 Rider 提供的工具，新增 Migration，並 Update Database，可以參考前篇 **_[新增 Migration](/posts/asp-dot-net-core-jwt-tutorial/#新增-migration)_**，連回資料庫確認更新結果，如果有看到多了一個 UserRole 的欄位，就是成功了
-![UserRole column](user-role-column.png)
+![UserRole column](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial2/user-role-column.png)
 
 接下來將原本的測試註冊時的 **peter 改成人資主管 HrHead(2)**，**Enum 類別的成員，如果沒有特別設定整數值的話，預設是從 0 開始，也就是說由上往下第一個成員是 0，第一個成員是 1，依此類推**
 
 這邊我直接使用 SQL 改，在資料庫右鍵 → New → Query Console，會出現 SQL 的查詢編輯器，輸入下面的更新語法
 
-![New Query Console](new-query-console.png)
+![New Query Console](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial2/new-query-console.png)
 
 ```sql
 -- 因為我目前只有一個 peter@gmail.com 的帳號，
@@ -384,7 +384,7 @@ WHERE Email = 'peter@gmail.com'
 
 確認 peter 的角色是不是 2（人資主管）
 
-![Update UserRole success](update-user-role-success.png)
+![Update UserRole success](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial2/update-user-role-success.png)
 
 ## 新增角色資料
 
@@ -410,7 +410,7 @@ FROM    Employees
 ORDER BY UserRole DESC
 ```
 
-![Employees Data](emplyee-data.png)
+![Employees Data](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial2/emplyee-data.png)
 
 ## 配合角色驗證調整項目
 
@@ -886,15 +886,15 @@ public class EmployeeController(IEmployeeService employeeService) : Controller
 
 本例角色是**實習生(UserRole = 0)**，先用 `auth/login` 取得 heine 的 JWT：在用下面的相關網址測試權限
 
-![Heine JWT](heine-jwt.png)
+![Heine JWT](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial2/heine-jwt.png)
 
 1. `get/employee` 測試取得自己的員工資料
 
-![Heine employee data](heine-employee-data.png)
+![Heine employee data](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial2/heine-employee-data.png)
 
 2. `get/employees` 測試取得所有員工資料，會發現是 Http 403 回應，代表實習生是沒有這個權限的
 
-![Heine get employees forbidden](heine-get-employees.png)
+![Heine get employees forbidden](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial2/heine-get-employees.png)
 
 ### Adam
 
@@ -902,11 +902,11 @@ public class EmployeeController(IEmployeeService employeeService) : Controller
 
 1. `get/employee`
 
-![Adam employee data](adam-employee-data.png)
+![Adam employee data](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial2/adam-employee-data.png)
 
 2. `get/employees`
 
-![Adam get employees forbidden](adam-get-employees-forbidden.png)
+![Adam get employees forbidden](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial2/adam-get-employees-forbidden.png)
 
 ### Peter
 
@@ -914,8 +914,8 @@ public class EmployeeController(IEmployeeService employeeService) : Controller
 
 1. `get/employee`
 
-![Peter employee data](peter-employee-data.png)
+![Peter employee data](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial2/peter-employee-data.png)
 
 2. `get/employees`
 
-![Peter get employees](peter-get-employees.png)
+![Peter get employees](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial2/peter-get-employees.png)
