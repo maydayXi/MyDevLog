@@ -1,4 +1,5 @@
-baseURL: https://example.org/
+#baseURL: https://example.org/
+baseURL: https://maydayxi.github.io/MyDevLog/
 theme: hugo-theme-stack
 title: My Dev Log
 copyright: MyDevLog
