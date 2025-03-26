@@ -181,7 +181,7 @@ var jwtOptions = builder.Configuration.GetSection(nameof(JwtOptions)).Get<JwtOpt
 }
 ```
 
-- **Get&lt;T&gt;：會將上一個方法取得的設定轉成 T 類別，也就是上一篇完成的 _[JwtOptions.cs](/posts/asp-dot-net-core-jwt-tutorial/#加載-jwt-設定)_** 相當於將上一個方法取得的設定執行下面的程式，但要記得**類別欄位大小寫要一致，不然有些值會無法正確轉換**
+- **Get&lt;T&gt;：會將上一個方法取得的設定轉成 T 類別，也就是上一篇完成的 _[JwtOptions.cs](https://maydayxi.github.io/MyDevLog/posts/asp-dot-net-core-jwt-tutorial/#加載-jwt-設定)_** 相當於將上一個方法取得的設定執行下面的程式，但要記得**類別欄位大小寫要一致，不然有些值會無法正確轉換**
 
 ```csharp
 var jwtOptions = new JwtOptions
@@ -210,7 +210,7 @@ options.IncludeErrorDetails = builder.Environment.IsDevelopment();
 
 - **Issuer：發行單位，確定是這個應用程式發出去的**
 - **ValidateLifetime：是否過期**
-- **IssuerSigningKey：加密金鑰**，設定方法跟 `JwtHelper.cs` 中一樣，參考 **_[產生 JWT](/posts/asp-dot-net-core-jwt-tutorial/#產生-jwt)_**，從這邊也可以看出 JWT 是對稱加密，加解密使用同一把 Key
+- **IssuerSigningKey：加密金鑰**，設定方法跟 `JwtHelper.cs` 中一樣，參考 **_[產生 JWT](https://maydayxi.github.io/MyDevLog/posts/asp-dot-net-core-jwt-tutorial/#產生-jwt)_**，從這邊也可以看出 JWT 是對稱加密，加解密使用同一把 Key
 
 ```csharp
 options.TokenValidationParameters = new TokenValidationParameters
@@ -242,7 +242,7 @@ options.TokenValidationParameters = new TokenValidationParameters
 - **Authentication：驗證你是誰**
 - **Authorization：知道你是誰後，驗證你有沒有權限做這件事**
 
-以整個應用場景延續 **_[產生 JWT](/posts/asp-dot-net-core-jwt-tutorial/#產生-jwt)_**，如果有出國經驗，可以想像成，你拿著 **護照(Claims)** **去日本(Login)**，入境時海關會**確認你的身份(臺灣人，姓名 - Validate)**，如果沒有問題就會**放你入境(Authorization)**，並給你**入境許可(JWT)**，因為臺灣**免簽入境可以待 90 天(JWT.Exp)**，成功入境後，可以去東京迪士尼、大板環球……
+以整個應用場景延續 **_[產生 JWT](https://maydayxi.github.io/MyDevLog/posts/asp-dot-net-core-jwt-tutorial/#產生-jwt)_**，如果有出國經驗，可以想像成，你拿著 **護照(Claims)** **去日本(Login)**，入境時海關會**確認你的身份(臺灣人，姓名 - Validate)**，如果沒有問題就會**放你入境(Authorization)**，並給你**入境許可(JWT)**，因為臺灣**免簽入境可以待 90 天(JWT.Exp)**，成功入境後，可以去東京迪士尼、大板環球……
 
 前一陣子日本銀山溫泉因為遊客過多，所以有實施管制措施，如果**沒有入住當地的溫泉旅館或沒有入場券的遊客，會被禁止進入(Authorization)**
 
@@ -356,7 +356,7 @@ public class Employee
 }
 ```
 
-修改完成後記得使用 Rider 提供的工具，新增 Migration，並 Update Database，可以參考前篇 **_[新增 Migration](/posts/asp-dot-net-core-jwt-tutorial/#新增-migration)_**，連回資料庫確認更新結果，如果有看到多了一個 UserRole 的欄位，就是成功了
+修改完成後記得使用 Rider 提供的工具，新增 Migration，並 Update Database，可以參考前篇 **_[新增 Migration](https://maydayxi.github.io/MyDevLog/posts/asp-dot-net-core-jwt-tutorial/#新增-migration)_**，連回資料庫確認更新結果，如果有看到多了一個 UserRole 的欄位，就是成功了
 ![UserRole column](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial2/user-role-column.png)
 
 接下來將原本的測試註冊時的 **peter 改成人資主管 HrHead(2)**，**Enum 類別的成員，如果沒有特別設定整數值的話，預設是從 0 開始，也就是說由上往下第一個成員是 0，第一個成員是 1，依此類推**
