@@ -919,3 +919,776 @@ public class EmployeeController(IEmployeeService employeeService) : Controller
 2. `get/employees`
 
 ![Peter get employees](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial2/peter-get-employees.png)
+
+# RefreshToken
+
+RefreshToken 簡單來說就是**為了取得新的 JWT 的 Token**，這個驗證機制分成了兩個部分
+
+- **AccessToken**：以本篇來說，就是 **JWT**，為了安全性考量，效期比較短（數分 ~ 數小時）。
+- **RefreshToken**：更新 AccessToken 的 Token，為了使用者體驗並兼顧安全性，一樣**需要設定有效期限，不過期限比較長（數日）**。
+
+因為 JWT 的有效期限比較短，假設一個使用者在系統操作某個功能，一段時間後又需要操作另一個功能，但因為時間的關係導致 JWT 過期了，這個時候可能會強制登出，或回傳 Http 401，最後使用者都要重新登入才可以進行接下來的任務，這樣會讓使用者體驗不佳。我個人覺得 **RefreshToken 是在安全性及使用者體驗中取得一個平衡，在 JWT 過期時，可以使用 RefreshToken 來更換一個新的 JWT，讓使用者可以不用重新登入，增加使用者體驗**
+
+## Sequence Diagram
+
+登入的部分可以參考 **_[](https://maydayxi.github.io/MyDevLog/posts/asp-dot-net-core-jwt-tutorial/#jwt)_**，**不過在登入完成後回傳的物件除了 JWT 還增加了一個 RefreshToken**，下圖為 RefreshToken 使用場景
+
+1. 當需要某存取伺服器上的資源時，跟原本使用 JWT 一樣，將 JWT 傳送至伺服器驗證
+2. 如果 JWT 合法就可以存取相關資源，如果 JWT 過期**伺服器會回應 JWT 過期**了。
+3. 將 RefreshToken 送到伺服器驗證
+4. **RefreshToken 合法伺服器會更換新的 JWT，如果 RefreshToken 也過期了或是不合法，就要重新登入**。
+5. **將新的 JWT 回應給使用者（就像再次登入的意思），至於要不要回傳新的 RefreshToken 會依使用需求而定**
+
+```
+ ┌──────┐                   ┌──────────────────────┐       ┌─────────┐
+ │Client│                   │Filter(Validate Token)│       │WebServer│
+ └──┬───┘                   └──────────┬───────────┘       └────┬────┘
+    │                                  │                        │
+    │         1. Request(JWT)          │                        │
+    │─────────────────────────────────>│                        │
+    │                                  │                        │
+    │                                  │   2-1. JWT is valid    │
+    │                                  │───────────────────────>│
+    │                                  │                        │
+    │   2-2. Response(JWT Expired)     │                        │
+    │<─────────────────────────────────│                        │
+    │                                  │                        │
+    │    3. Request(RefreshToken)      │                        │
+    │─────────────────────────────────>│                        │
+    │                                  │                        │
+    │                                  │4. RefreshToken is valid│
+    │                                  │───────────────────────>│
+    │                                  │                        │
+    │4-2 Response(RefreshToken Expired)│                        │
+    │<─────────────────────────────────│                        │
+    │                                  │                        │
+    │      5. Response(NewJWT, NewRefreshToken[optional])       │
+    │<──────────────────────────────────────────────────────────│
+ ┌──┴───┐                   ┌──────────┴───────────┐       ┌────┴────┐
+ │Client│                   │Filter(Validate Token)│       │WebServer│
+ └──────┘                   └──────────────────────┘       └─────────┘
+```
+
+## TokenHelper
+
+為了**產生 RefreshToken**，在使用者登入時一並回傳，在 `Helper` 目錄下新增 `TokenHelper.cs`
+
+```csharp
+using System.Security.Cryptography;
+
+namespace JWT_Authentication_API.Helper;
+
+/// <summary>
+/// Token 輔助類別，宣告為 static
+/// 不需要 DI 可以直接使用
+/// </summary>
+public static class TokenHelper
+{
+    /// <summary>
+    /// 產生 RefreshToken
+    /// </summary>
+    /// <param name="byteSize"> RefreshToken 的位元長度，預設 32 位元 </param>
+    /// <returns> Base64 編碼後的 RefreshToken </returns>
+    public static string GenerateRefreshToken(int byteSize = 32)
+    {
+        var randomBytes = new byte[byteSize];
+        var rnd = RandomNumberGenerator.Create();
+        rnd.GetBytes(randomBytes);
+        return Convert.ToBase64String(randomBytes);
+    }
+}
+```
+
+## RefreshToken Entity
+
+為了驗證 RefreshToken，需要將 RefreshToken 存入資料庫，在 `Entities` 目錄新增 `RefreshToken.cs` 如下
+
+**其中為了知道這個 RefreshToken 是哪一位員工的，所以加入了 EmployeeId 這個欄位**，另外 **Employee 導航屬性，會將 EmployeeId 自動關聯到 Employee 的對映物件**，不過資料庫不是本篇的重點，所以就不多說明了
+
+```csharp
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace JWT_Authentication_API.Entities;
+
+/// <summary>
+/// RefreshToken 的資料模型
+/// </summary>
+public class RefreshToken
+{
+    /// <summary>
+    /// RefreshToken 的資料識別
+    /// </summary>
+    [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public Guid Id { get; set; }
+    /// <summary>
+    /// RefreshToken 的值
+    /// </summary>
+    [Required, MaxLength(512)]
+    public string Token { get; set; } = string.Empty;
+    /// <summary>
+    /// RefreshToken 過期的時間
+    /// </summary>
+    public DateTimeOffset ExpiresAt { get; set; }
+    /// <summary>
+    /// RefreshToken 建立的時間，預設是產生的當下
+    /// </summary>
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.Now;
+    /// <summary>
+    /// 員工的識別（FK）
+    /// </summary>
+    public Guid EmployeeId { get; set; }
+    /// <summary>
+    /// 關聯的 Employee（ORM 的關聯設定）
+    /// </summary>
+    [ForeignKey("EmployeeId")]
+    public Employee Employee { get; set; } = null!;
+}
+```
+
+接著在 `AppDbContext.cs` 加入 RefreshToken 的對映
+
+```csharp
+using Microsoft.EntityFrameworkCore;
+
+namespace JWT_Authentication_API.Entities;
+
+/// <summary>
+/// Database Context
+/// </summary>
+/// <param name="options"> 資料庫設定 </param>
+public class AppDbContext(DbContextOptions<AppDbContext> options)
+    : DbContext(options)
+{
+    /// <summary>
+    /// 員工資料表
+    /// </summary>
+    public DbSet<Employee> Employees { get; set; }
+    /// <summary>
+    /// Token 黑名單資料表
+    /// </summary>
+    public DbSet<TokenBlackList> TokenBlackLists { get; set; }
+    /// <summary>
+    /// RefreshToken 資料表
+    /// </summary>
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
+}
+```
+
+完成後使用 Rider 新增 Migration 並更新資料庫 **_[參考](https://maydayxi.github.io/MyDevLog/posts/asp-dot-net-core-jwt-tutorial/#新增-migration)_**
+
+## ITokenService
+
+由於 RefreshToken 的驗證機制，我利用上一篇所建立的 **_[TokenService](https://maydayxi.github.io/MyDevLog/posts/asp-dot-net-core-jwt-tutorial/#tokenservice)_** 實作相關功能，所以先定義會用到的方法
+
+1. **新增：員工登入時，產生新的 RefreshToken**
+2. **驗證： 在要更新之前要檢查 RefreshToken 是否過期**，如果過期回傳 RefreshToken 過期，沒過期才更新。
+3. **更新：JWT 過期時，要產生新的 JWT，同時更新一個新的 RefreshToken**，基於安全性考量，我**只更新 Token 的值，不更新到期時間**
+4. **刪除：員工登出時，刪除員工所屬的 RefreshToken**，再新增到黑名單
+
+```csharp
+namespace JWT_Authentication_API.Interfaces;
+
+/// <summary>
+/// Token 相關服務的介面
+/// </summary>
+public interface ITokenService
+{
+    /// <summary>
+    /// 新增 token 到黑名單
+    /// </summary>
+    /// <param name="token"> 要新增的 token </param>
+    /// <returns> 新增結果 </returns>
+    Task<bool> AddTokenToTokenBlackListAsync(string token);
+
+    /// <summary>
+    /// 新增 RefreshToken
+    /// </summary>
+    /// <param name="refreshToken"> 要新增的 RefreshToken </param>
+    /// <returns> 新增的結果 </returns>
+    Task<bool> AddRefreshTokenAsync(RefreshTokenRequestDto refreshTokenRequestDto);
+
+    /// <summary>
+    /// 檢查 RefreshToken 是否過期
+    /// </summary>
+    /// <param name="refreshTokenRequestDto"> 要檢查的 RefreshToken 物件 </param>
+    /// <returns> 檢查結果 </returns>
+    Task<bool> IsRefreshTokenExpiredAsync(RefreshTokenRequestDto refreshTokenRequestDto);
+
+    /// <summary>
+    /// 更新 RefreshToken
+    /// </summary>
+    /// <param name="refreshTokenRequestDto"> 要更新的 RefreshToken 物件 </param>
+    /// <returns> 更新結果 </returns>
+    Task<bool> UpdateRefreshTokenAsync(RefreshTokenRequestDto refreshTokenRequestDto);
+
+    /// <summary>
+    /// 刪除 RefreshToken
+    /// </summary>
+    /// <param name="refreshToken"> 要刪除的 RefreshToken </param>
+    /// <returns> 刪除結果 </returns>
+    Task<bool> RemoveRefreshTokenAsync(RefreshTokenRequestDto refreshTokenRequestDto);
+}
+```
+
+## RefreshTokenRequestDto
+
+上一個完成後會出現錯誤，因為沒有 `RefreshTokenRequestDto` 這個物件，所以在 `Models` 下新增這個類別，上面的方法，都會需要知道要異動的是哪一筆 RefreshToken，所以要知道**哪一個員工、舊的 RefreshToken 或 新的 RefreshToken**
+
+```csharp
+namespace JWT_Authentication_API.Models;
+
+/// <summary>
+/// RefreshToken 的請求物件
+/// </summary>
+public class RefreshTokenRequestDto
+{
+    /// <summary>
+    /// 員工的識別
+    /// </summary>
+    public Guid EmployeeId { get; set; } = Guid.Empty;
+    /// <summary>
+    /// 舊的 RefreshToken
+    /// </summary>
+    public string OldRefreshToken { get; set; } = string.Empty;
+    /// <summary>
+    /// 新的 RefreshToken
+    /// </summary>
+    public string NewRefreshToken { get; set; } = string.Empty;
+}
+```
+
+最後傳 `ITokenService` 補上下面的程式碼就可以了
+
+```csharp
+using JWT_Authentication_API.Models;
+```
+
+## TokenService
+
+介面定義完成後，就可以開始實作 `TokenService 的方法`，細節說明如下\
+**更新、刪除都要找出要異動的那一筆資料**，因此將查詢要異動的資料查詢方法獨立出來。
+
+開啟 `TokenService.cs`，新增查詢 RefreshToken 的方法 `_getRefreshToken`\
+加入**新增、驗證、更新、刪除 RefreshToken 的方法**如下
+
+```csharp
+using JWT_Authentication_API.Entities;
+using JWT_Authentication_API.Helper;
+using JWT_Authentication_API.Interfaces;
+using JWT_Authentication_API.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace JWT_Authentication_API.Services;
+/// <summary>
+/// Token 資料存取服務
+/// </summary>
+/// <param name="context"> 資料庫物件 </param>
+public class TokenService(AppDbContext context): ITokenService
+{
+    /// <summary>
+    /// 資料庫物件
+    /// </summary>
+    private readonly AppDbContext _appDb = context;
+
+    /// <summary>
+    /// 將需要異動的 RefreshToken 依 token 及員工編號取得
+    /// </summary>
+    private readonly Func<string, Guid, Task<RefreshToken?>> _getRefreshToken =
+        async (token, employeeId) =>
+            await context.RefreshTokens.FirstOrDefaultAsync(r
+                => r.EmployeeId == employeeId && r.Token == token);
+
+    .......
+
+    #region Add Refresh Token
+    /// <summary>
+    /// 新增 RefreshToken
+    /// </summary>
+    /// <param name="refreshTokenRequestDto"> 要新增的 RefreshToken </param>
+    /// <returns> 新增的結果 </returns>
+    /// <exception cref="ArgumentException"> 沒有提供新增的 RefreshToken 或所屬員工 </exception>
+    public async  Task<bool> AddRefreshTokenAsync(RefreshTokenRequestDto refreshTokenRequestDto)
+    {
+        await _appDb.RefreshTokens.AddAsync(new RefreshToken
+        {
+            Token = refreshTokenRequestDto.NewRefreshToken,
+            // 配合週休二日，設定 5 天後到期
+            ExpiresAt = DateTimeOffset.Now.AddDays(5),
+            EmployeeId = refreshTokenRequestDto.EmployeeId
+        });
+
+        return await _appDb.SaveChangesAsync() > 0;
+    }
+    #endregion
+
+    #region Validate RefreshToken
+    /// <summary>
+    /// 檢查 RefreshToken 是否過期
+    /// </summary>
+    /// <param name="refreshTokenRequestDto"> 要檢查的 RefreshToken </param>
+    /// <returns> 檢查結果 </returns>
+    /// <exception cref="KeyNotFoundException"> 找不到要檢查的 RefreshToken </exception>
+    public async Task<bool> IsRefreshTokenExpiredAsync(RefreshTokenRequestDto refreshTokenRequestDto)
+    {
+        // 取得要檢查的 RefreshToken
+        var refreshToken = await _getRefreshToken(
+            refreshTokenRequestDto.OldRefreshToken, refreshTokenRequestDto.EmployeeId);
+
+        // 找不到要檢查的 RefreshToken
+        if (refreshToken == null)
+            throw new KeyNotFoundException("Refresh token not found!");
+
+        // 回傳是否過期
+        return DateTimeOffset.UtcNow > refreshToken.ExpiresAt;
+    }
+    #endregion
+
+    #region Update Refresh Token
+    /// <summary>
+    /// 更新 RefreshToken
+    /// </summary>
+    /// <param name="refreshTokenRequestDto"> 要更新的 RefreshToken </param>
+    /// <returns></returns>
+    /// <exception cref="KeyNotFoundException"> 找不到要更新的 RefreshToken </exception>
+    /// <exception cref="InvalidOperationException"> 新增舊的 RefreshToken 黑名單失敗 </exception>
+    /// <exception cref="Exception"> 更新失敗 </exception>
+    public async Task<bool> UpdateRefreshTokenAsync(RefreshTokenRequestDto refreshTokenRequestDto)
+    {
+        // 先找出要更新的 refreshToken
+        var refreshToken = await _getRefreshToken(
+            refreshTokenRequestDto.OldRefreshToken, refreshTokenRequestDto.EmployeeId);
+
+        // 如果找不到要刪除的 RefreshToken
+        if (refreshToken == null)
+            throw new KeyNotFoundException("Refresh token not found!");
+
+        // 將舊的 RefreshToken 新增到黑名單
+        var addResult = await AddTokenToTokenBlackListAsync(refreshToken.Token);
+        if(!addResult) throw new InvalidOperationException
+            ("Failed to add refresh token into black list!");
+
+        // 更新 RefreshToken
+        refreshToken.Token = refreshTokenRequestDto.NewRefreshToken;
+        _appDb.RefreshTokens.Update(refreshToken);
+        return await _appDb.SaveChangesAsync() > 0;
+    }
+    #endregion
+
+    #region Remove Refresh Token
+    /// <summary>
+    /// 刪除 RefreshToken
+    /// </summary>
+    /// <param name="refreshTokenRequestDto"> 要刪除的 RefreshToken </param>
+    /// <returns> 刪除結果 </returns>
+    /// <exception cref="ArgumentException"> 沒有提供舊的 RefreshToken 或所屬員工 </exception>
+    /// <exception cref="InvalidOperationException"> 舊的 RefreshToken 新增黑名單失敗 </exception>
+    /// <exception cref="Exception"> 刪除失敗 </exception>
+    public async Task<bool> RemoveRefreshTokenAsync(RefreshTokenRequestDto refreshTokenRequestDto)
+    {
+
+        // 先找出要刪除的 refreshToken
+        var refreshToken = await _getRefreshToke(refreshTokenRequestDto.OldRefreshToken, refreshTokenRequestDto.EmployeeId);
+        // 如果找不到要刪除的 RefreshToken
+        if (refreshToken == null)
+            throw new KeyNotFoundException("Refresh token not found!");
+
+        // 將要刪除的 RefreshToken 新增到黑名單
+        var addResult = await AddTokenToTokenBlackListAsync(refreshToken.Token);
+        if(!addResult) throw new InvalidOperationException
+            ("Failed to add refresh token into black list!");
+
+        // 再將舊的 RefreshToken 刪除
+        _appDb.RefreshTokens.Remove(refreshToken);
+
+        return await _appDb.SaveChangesAsync() > 0;
+    }
+    #endregion
+}
+```
+
+## RefreshTokenResponseDto
+
+在一開始的介紹說明，可以知道 RefreshToken 要回傳兩個物件
+
+1. **AccessToken：就是合法的 JWT**
+2. **RefreshToken：更新 AccessToken 的 Token**
+
+所以要新增一個回傳用的 Model，在 `Models` 新增 `RefreshTokenResponseDto.cs`
+
+```csharp
+namespace JWT_Authentication_API.Models;
+
+/// <summary>
+/// RefreshToken 回應
+/// </summary>
+public class RefreshTokenResponseDto
+{
+    /// <summary>
+    /// JWT
+    /// </summary>
+    public string AccessToken { get; set; } = string.Empty;
+    /// <summary>
+    /// RefreshToken
+    /// </summary>
+    public string RefreshToken { get; set; } = string.Empty;
+}
+```
+
+## Refresh
+
+最後回到 `AuthController.cs` 實作 `Refresh` 檢查及更新 AccessToken 的方法，預期**會傳送要更新的 RefreshToken**，所以用 **RefreshTokenRequestDto 當作參數**
+
+```csharp
+/// <summary>
+/// 驗證、更新 RefreshToken
+/// </summary>
+/// <param name="requestDto"> 要驗證的 RefreshToken </param>
+/// <returns> 新的 RefreshToken 或 AccessToken </returns>
+[HttpPost("refresh-token")]
+public async Task<ActionResult> RefreshTokenAsync(RefreshTokenRequestDto requestDto)
+{
+    // 產生一個新的 RefreshToken
+    requestDto.NewRefreshToken = TokenHelper.GenerateRefreshToken();
+    // 更新 RefreshToken
+    var updateResult = await _tokenService.UpdateRefreshTokenAsync(requestDto);
+
+    return Ok(new RefreshTokenResponseDto
+    {
+        RefreshToken = requestDto.NewRefreshToken
+    });
+}
+```
+
+完成後，會發現沒有產生新的 JWT 給 AccessToken，參考 **_[CreateJwt](https://maydayxi.github.io/MyDevLog/posts/asp-net-core-jwt-tutorial-refresh-token/#createjwt)_**，產生 JWT 需要 `EmployeeDto`，所以要新增一個取得員資料的方法，開啟 `IEmployeeService`、`EmployeeService`，加入 `GetEmployeeById` 方法
+
+```csharp
+using JWT_Authentication_API.Models;
+
+namespace JWT_Authentication_API.Interfaces;
+
+/// <summary>
+/// 員工資料存取介面
+/// </summary>
+public interface IEmployeeService
+{
+
+    ......
+
+    /// <summary>
+    /// 依員工的 Id 取得員工資料
+    /// </summary>
+    /// <param name="id"> 員工識別 </param>
+    /// <returns> 員工資料 </returns>
+    Task<EmployeeDto?> GetEmployeeByIdAsync(Guid id);
+
+    ...
+}
+
+using System.ComponentModel.DataAnnotations;
+using JWT_Authentication_API.Entities;
+using JWT_Authentication_API.Interfaces;
+using JWT_Authentication_API.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+
+namespace JWT_Authentication_API.Services;
+
+/// <summary>
+/// 員工資料存取服務
+/// </summary>
+/// <param name="dbContext"> 資料庫對映物件 </param>
+public class EmployeeService(AppDbContext dbContext) : IEmployeeService
+{
+    /// <summary>
+    /// 資料庫對映物件
+    /// </summary>
+    private readonly AppDbContext _appDb = dbContext;
+
+    ......
+
+    /// <summary>
+    /// 依員工 Id 找出員工資料
+    /// </summary>
+    /// <param name="id"> 員工識別 </param>
+    /// <returns> 員工資料 </returns>
+    public async Task<EmployeeDto?> GetEmployeeByIdAsync(Guid id)
+    {
+        var employee = await _appDb.Employees.FirstOrDefaultAsync(e => e.Id == id);
+
+        if (employee == null) return null;
+
+        return new EmployeeDto
+        {
+            Email = employee.Email,
+            EmployeeRole = employee.UserRole
+        };
+    }
+
+    ......
+}
+```
+
+最後回到 `AuthController` 修改 `Refresh` 方法
+
+```csharp
+/// <summary>
+/// 驗證、更新 RefreshToken
+/// </summary>
+/// <param name="requestDto"> 要驗證的 RefreshToken </param>
+/// <returns> 新的 RefreshToken 或 AccessToken </returns>
+[HttpPost("refresh-token")]
+public async Task<ActionResult> RefreshTokenAsync(RefreshTokenRequestDto requestDto)
+{
+    // 驗證 RefreshToken
+    if(string.IsNullOrEmpty(requestDto.OldRefreshToken) ||
+        requestDto.EmployeeId == Guid.Empty)
+        return BadRequest("'EmployeeId' or 'OldRefreshToken' cannot be null or empty!");
+    if(await _tokenService.IsRefreshTokenExpiredAsync(requestDto))
+        return BadRequest("Refresh token expired!");
+
+    // 產生一個新的 RefreshToken
+    requestDto.NewRefreshToken = TokenHelper.GenerateRefreshToken();
+    // 更新 RefreshToken
+    await _tokenService.UpdateRefreshTokenAsync(requestDto);
+
+    // 找出目前使用的員工
+    var employee = await _employeeService.GetEmployeeByIdAsync(requestDto.EmployeeId);
+    if (employee == null)
+        return NotFound("Employee does not exist!");
+
+    // 回傳新的 RefreshTokenResponse
+    return Ok(new RefreshTokenResponseDto
+    {
+        AccessToken = _jwtHelper.CreateJwt(employee!),
+        RefreshToken = requestDto.NewRefreshToken
+    });
+}
+```
+
+最後調整 `LoginAsync` 及 `LogoutAsync` 的方法，在登入時要新增 RefreshToken，登出時要將 JWT 及 RefreshToken 加到黑名單，並刪除員工所屬的 RefreshToken
+
+```csharp
+#region 登出
+/// <summary>
+/// 登出 API
+/// </summary>
+/// <returns> 登出結果 </returns>
+[Authorize]
+[HttpPost("logout")]
+public async Task<IActionResult> LogoutAsync(RefreshTokenRequestDto requestDto)
+{
+    // 從 header 讀取 JWT
+    var token = $"{HttpContext.Request.Headers.Authorization}"
+        .Replace("Bearer", string.Empty, StringComparison.OrdinalIgnoreCase)
+        .Trim();
+    if (string.IsNullOrEmpty(token))
+        return BadRequest("Not token provided!");
+
+    // 將 JWT 加入黑名單
+    var result = await _tokenService.AddTokenToTokenBlackListAsync(token);
+    if (!result) return BadRequest("Logout failed!");
+
+    // 將 refreshToken 刪除
+    result = await _tokenService.RemoveRefreshTokenAsync(requestDto);
+    if (!result) return BadRequest("Logout failed!");
+
+    return Ok("Logout successfully!");
+}
+#endregion
+```
+
+登入的部分，因為需要員工的 Id，所以要修改 `EmployeeDto`，加入 EmployeeId 的欄位
+
+```csharp
+namespace JWT_Authentication_API.Models;
+
+/// <summary>
+/// 員工角色資料
+/// </summary>
+public class EmployeeDto
+{
+    /// <summary>
+    /// 員工 Id
+    /// </summary>
+    public Guid Id { get; set; } = Guid.Empty;
+
+    ...
+}
+```
+
+調整 `EmployeeService` 的 `GetEmployeeByEmailAsync` 方法，多回傳一個 Id 欄位
+
+```csharp
+/// <summary>
+/// 依帳號取得員工資料
+/// </summary>
+/// <param name="email"> 登入信箱/註冊信箱 </param>
+/// <returns> 員工資料 或 null </returns>
+public async Task<EmployeeDto?> GetEmployeeByEmailAsync(string email)
+{
+    var employee = await _appDb.Employees
+        .FirstOrDefaultAsync(e => e.Email == email);
+
+    return employee == null
+        ? null
+        : new EmployeeDto
+        {
+            Id = employee.Id,
+            Email = employee.Email,
+            PasswordHash = employee.PasswordHash,
+            EmployeeRole = employee.UserRole
+        };
+}
+```
+
+回到 `LoginAsync`，加入新增 RefreshToken 的方法
+
+```csharp
+#region 登入
+/// <summary>
+/// 登入 API
+/// </summary>
+/// <param name="loginDto"> 使用者的輸入資料 </param>
+/// <returns> 登入結果 </returns>
+[AllowAnonymous]
+[HttpPost("login")]
+public async Task<ActionResult> LoginAsync(LoginDto loginDto)
+{
+    // 登入資料驗證
+    if (string.IsNullOrEmpty(loginDto.Email) ||
+        string.IsNullOrEmpty(loginDto.Password))
+        return BadRequest("Please provide 'Email' and 'Password'");
+
+    // 檢查員工帳號
+    var employee = await _employeeService.GetEmployeeByEmailAsync(loginDto.Email);
+    if (employee == null)
+        return BadRequest("User does not exist!");
+
+    // 檢查員工密碼並回傳登入結果
+    if (!_authService.IsValidateUserAsync(loginDto, employee))
+        return BadRequest("Login failed!");
+
+    // 新增 RefreshToken 及產生 Jwt
+    var jwt = _jwtHelper.CreateJwt(employee);
+    var refreshToken = TokenHelper.GenerateRefreshToken();
+
+    var result = await _tokenService.AddRefreshTokenAsync(new RefreshTokenRequestDto
+    {
+        EmployeeId = employee.Id,
+        NewRefreshToken = refreshToken,
+    });
+    if(!result) return StatusCode(StatusCodes.Status500InternalServerError);
+
+    return Ok(new RefreshTokenResponseDto
+    {
+        AccessToken = jwt,
+        RefreshToken = refreshToken
+    });
+}
+#endregion
+```
+
+# 測試
+
+都完成後，就可以來測試 RefreshToken 的驗證機制了
+
+開啟 Postman 使用 peter 登入，如果有成功收到 ResponseToken，將 Response 的 body 整個 copy 下來，在 **Save Response** 下方有一個複製的按鈕
+
+```json
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJKV1QtQXV0aGVudGljYXRpb24tQVBJIiwic3ViIjoicGV0ZXJAZ21haWwuY29tIiwiZXhwIjoxNzQzMzUxNjk3LCJqdGkiOiI1Y2VlODA5OS0wMGRkLTQzODctYjg0Ny1lNzg3OWNiODliMDEiLCJpYXQiOiIxNzQzMzUxMDk3IiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoyfQ.6FD4TNvYlsLNdLLKj5nFmaiGIAxbvtDkSDfxUa9-Mwk",
+  "refreshToken": "qRs0NpTz1YHBAwZlYAbtZ0nI3oIxcHvMH2ELehqTaYI="
+}
+```
+
+![Peter login refresh token](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial2/peter-login-refreshtoken.png)
+
+## refresh-token
+
+接下來測試 `refresh-token`，由於需要知道 peter 的 Id，所以開啟 Rider 資料庫工具輸入下面的語法，來取得 Peter 的 Id，也將 Id 複製下來
+
+```SQL
+SELECT  Id
+FROM    Employees
+WHERE   Email = 'peter@gmail.com'
+```
+
+我的資料庫中 peter 的 Id 如下
+
+```
+8d9e431a-e002-416b-21f3-08dd670f7321
+```
+
+在 Postman 中新增一個 `refresh-token` 的 request，並在 body 中選 **raw**，最旁邊下拉選 **JSON**，輸入要傳送的物件格式 `RefreshTokenRequestDto` 如下
+
+- **employeeId：上面查詢的 peter Id**
+- **oldRefreshToken：一開始登入的 RefreshToken**
+- **newRefreshToken：更新不需要提供，由程式自己產生**，給空字串
+
+```json
+{
+  "employeeId": "8d9e431a-e002-416b-21f3-08dd670f7321",
+  "oldRefreshToken": "qRs0NpTz1YHBAwZlYAbtZ0nI3oIxcHvMH2ELehqTaYI=",
+  "newRefreshToken": ""
+}
+```
+
+最後 **Send**，看有沒有重新取得一組新的 `RefreshTokenResponseDto` 物件，如果有可以將它複製下來與第一次登入的對比
+
+![Peter refresh-token](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial2/peter-refresh-token.png)
+
+```json
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJKV1QtQXV0aGVudGljYXRpb24tQVBJIiwic3ViIjoicGV0ZXJAZ21haWwuY29tIiwiZXhwIjoxNzQzMzUxODIxLCJqdGkiOiJiNDQzYWFiNS1iZWE0LTRjMzUtOTkwMC04NjZmZDFhN2ZlYzQiLCJpYXQiOiIxNzQzMzUxMjIxIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoyfQ.K7Bc135CScAdUFqun1M4vVrl5CIBw2rApZgGqr5I1Y0",
+  "refreshToken": "NVqRHLaHqE3hyHbiAcdRq+kSgdnaeWvl525qhg2KxO4="
+}
+```
+
+## Logout
+
+最後來測登出，一樣傳入 `RefreshTokenRequestDto` 物件，不過更新不同的是 **oldRefreshToken**，要改成上一個測試 `refresh-token` 拿到的 refreshToken，如果**使用第一次登入所拿到的 refreshToken 應該會出現 HTTP 500**，因為原本的 refreshToken 在 `refresh-token` 的時候就己經寫到黑名單了，所以會找不到
+
+```json
+{
+  "employeeId": "8d9e431a-e002-416b-21f3-08dd670f7321",
+  "oldRefreshToken": "NVqRHLaHqE3hyHbiAcdRq+kSgdnaeWvl525qhg2KxO4=",
+  "newRefreshToken": ""
+}
+```
+
+另外將更新後的 AccessToken 放到 **Authorization**，
+
+![Logout Authorization](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial2/peter-logout-authorization.png)
+
+Send 後看登出結果
+
+![Logout](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial2/peter-logout.png)
+
+最後，使用資料庫工具確認黑名單有沒有資料，理論上來說應該要有 4 筆資料，**更新的時候會將第一次登入的兩個 Token 新增到黑單、登出的時候會把 refresh-token 取得的兩個新 Token 寫入**，使用下面的語法查詢
+
+```SQL
+SELECT  *
+FROM    TokenBlackLists
+```
+
+![Token Black List](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial2/token-black-list.png)
+
+RefreshToken 應該要是 0 筆，因為 peter 已經登出了
+
+```SQL
+SELECT  *
+FROM    dbo.RefreshTokens
+```
+
+![Empty RefreshToken](https://cdn.jsdelivr.net/gh/maydayXi/MyDevLog@main/content/posts/jwt-tutorial2/empty-refresh-token.png)
+
+# 結語
+
+內容很長，終於完成了！不過這個版本的程式仍然有一些問題，例如：在登出的時候**同時新增了黑名單，刪除 RefreshToken**，而這兩個操作各自儲存了異動，容易造成**資料不一致**
+
+也就是說，**新增黑名單完成後，如果在刪除 RefreshToken 出現錯誤導致 RefreshToken 並沒有被刪除，但就已經出現在黑名單了，這樣的資料不應該新增進黑名單**，應該是兩個操作同時完成後再一次儲存。
+
+**所以如果同時要操作多個資料表，需要所有操作都完成後再一次儲存所有異動**
+
+第二個問題是，我在 `Service` 層中丟出了很多系統執行時的 Exception，但沒有在 `Controller` 中處理，**應該要在 Controller 統一處理，因此需要統一回應物件格式**，這些會在下一篇一一說明並實作。
