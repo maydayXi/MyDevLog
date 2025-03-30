@@ -1,6 +1,6 @@
 ---
 date: "2025-03-23T13:26:42+08:00"
-lastmod: "2025-03-27 01:00:43"
+lastmod: "2025-03-31 01:06:10"
 draft: false
 title: "ASP.NET Core 實作 JWT Refresh Token"
 description: 探索如何實現 JWT Refresh Token，提升安全性與使用者體驗
