@@ -42,7 +42,7 @@ permalinks:
 pagination:
   # The number of pages per pager. Default is 10.
   # 3 pages per paper
-  paperSize: 3
+  pagerSize: 3
 
 # Site-wide settings
 # See https://stack.jimmycai.com/config/site
