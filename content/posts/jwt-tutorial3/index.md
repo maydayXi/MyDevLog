@@ -926,3 +926,42 @@ public async Task<ActionResult> RefreshTokenAsync([FromBody] RefreshTokenDto ref
 ```
 
 # UnitOfWork
+
+在測試中有一種情況，在登出的時候，用**已使用過的 RefreshToken 去登出的話，會出現「找不到 RefreshToken」的 Http 500**，結果看起來沒有錯，不過 **再次使用正確的 RefreshToken 登出的話，會出現「這個 AccessToken 出現在黑名單」** 中，這是因為在登出方法中，**先將 AccessToken 寫入黑名單中，再將 RefreshToken 寫入黑名單如下**，只要其中一個操作失敗了，兩個操作都要回到一開始的狀態。
+
+**AccessToken 寫入黑名操作順利完成，不過 RefreshToken 寫入黑名單，因為找不到使用中的 RefreshToken 而失敗，理論上來說這一整個操作應該視為失敗**，要將原本寫入黑名單的 AccessToken 移除
+
+```csharp
+#region 登出
+/// <summary>
+/// 登出 API
+/// </summary>
+/// <param name="refreshTokenDto"> 要刪除的 RefreshToken </param>
+/// <returns> 登出結果 </returns>
+[Authorize]
+[HttpPost("logout")]
+public async Task<IActionResult> LogoutAsync(RefreshTokenDto refreshTokenDto)
+{
+    // 從 header 讀取 JWT(AccessToken) 並進行驗證
+    var token = $"{HttpContext.Request.Headers.Authorization}"
+        .Replace("Bearer ", string.Empty, StringComparison.OrdinalIgnoreCase);
+
+    if (!TokenHelper.HasToken(token)) return BadRequest("'AccessToken' is required!");
+
+    // 檢查 AccessToken 有沒有被使用過
+    if(await _tokenService.IsTokenRevokedAsync(token)) return Unauthorized($"'{token}' is revoked!");
+
+    // 將 JWT 加入黑名單
+    var result = await _tokenService.AddTokenToTokenBlackListAsync(token);
+    if (!result) return BadRequest("Logout failed!");
+
+    // 將 refreshToken 刪除
+    result = await _tokenService.RemoveRefreshTokenAsync(refreshTokenDto);
+    if (!result) return BadRequest("Logout failed!");
+
+    return Ok("Logout successfully!");
+}
+#endregion
+```
+
+而 UnitOfWork 就是為了解決這樣的問題而出現的，中文應該是「**工作單元**」，**每一個工作單元包含了所有完成這個方法所需要的資料操作，並且在所有操作完成後統一存儲**
